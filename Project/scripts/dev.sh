@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 团队知识库 - 开发环境启动脚本
-# 自动检查依赖、初始化数据库、启动开发服务器
+# 自动检查依赖、初始化数据库、启动开发服务器、打开调试链接
 
 set -e  # 遇到错误立即停止
 
@@ -10,7 +10,16 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+# 服务地址变量
+FRONTEND_PORT=3000
+BACKEND_PORT=8000
+FRONTEND_URL="http://localhost:${FRONTEND_PORT}"
+BACKEND_URL="http://localhost:${BACKEND_PORT}"
+API_HEALTH_URL="${BACKEND_URL}/api/v1/health"
 
 # 打印带颜色的信息
 print_info() {
@@ -29,11 +38,102 @@ print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
+print_highlight() {
+    echo -e "${MAGENTA}🌟 $1${NC}"
+}
+
 print_header() {
-    echo -e "${BLUE}"
-    echo "🚀 团队知识库 - 开发环境启动"
-    echo "================================="
+    echo -e "${CYAN}"
+    echo "🚀 团队知识库 - 智能开发环境"
+    echo "====================================="
     echo -e "${NC}"
+}
+
+# 检测操作系统
+detect_os() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo "linux"
+    elif [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+        echo "windows"
+    else
+        echo "unknown"
+    fi
+}
+
+# 自动打开浏览器
+open_browser() {
+    local url=$1
+    local os=$(detect_os)
+    
+    case $os in
+        "macos")
+            open "$url" 2>/dev/null &
+            ;;
+        "linux")
+            xdg-open "$url" 2>/dev/null || \
+            gnome-open "$url" 2>/dev/null || \
+            kde-open "$url" 2>/dev/null &
+            ;;
+        "windows")
+            start "$url" 2>/dev/null &
+            ;;
+        *)
+            print_warning "未能自动打开浏览器，请手动访问: $url"
+            ;;
+    esac
+}
+
+# 等待服务启动
+wait_for_service() {
+    local url=$1
+    local service_name=$2
+    local max_attempts=30
+    local attempt=1
+    
+    print_info "等待${service_name}服务启动..."
+    
+    while [ $attempt -le $max_attempts ]; do
+        if curl -s "$url" > /dev/null 2>&1; then
+            print_success "${service_name}服务已启动: $url"
+            return 0
+        fi
+        
+        if [ $((attempt % 5)) -eq 0 ]; then
+            print_info "等待${service_name}服务启动... ($attempt/$max_attempts)"
+        fi
+        
+        sleep 1
+        attempt=$((attempt + 1))
+    done
+    
+    print_warning "${service_name}服务启动超时，请手动检查: $url"
+    return 1
+}
+
+# 检测实际运行端口
+detect_actual_ports() {
+    print_info "检测实际运行端口..."
+    
+    # 检测前端端口
+    if lsof -Pi :3000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        if lsof -Pi :3001 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            FRONTEND_PORT=3001
+            FRONTEND_URL="http://localhost:3001"
+            print_info "前端运行在备用端口: 3001"
+        fi
+    fi
+    
+    # 检测后端端口
+    if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        if lsof -Pi :8001 -sTCP:LISTEN -t >/dev/null 2>&1; then
+            BACKEND_PORT=8001
+            BACKEND_URL="http://localhost:8001"
+            API_HEALTH_URL="${BACKEND_URL}/api/v1/health"
+            print_info "后端运行在备用端口: 8001"
+        fi
+    fi
 }
 
 # 检查Node.js版本
@@ -110,13 +210,48 @@ check_ports() {
 # 启动开发服务器
 start_development() {
     print_info "启动开发服务器..."
-    print_info "前端: http://localhost:3000"
-    print_info "后端: http://localhost:8000"
+    print_info "前端: ${FRONTEND_URL}"
+    print_info "后端: ${BACKEND_URL}"
     print_info "按 Ctrl+C 停止服务器"
     echo ""
     
-    # 使用npm运行开发脚本
-    npm run dev
+    # 在后台启动服务
+    npm run dev &
+    SERVER_PID=$!
+    
+    # 等待服务启动
+    sleep 3
+    
+    # 检测实际端口
+    detect_actual_ports
+    
+    # 等待后端服务启动
+    if wait_for_service "$API_HEALTH_URL" "后端"; then
+        print_highlight "正在自动打开调试页面..."
+        
+        # 自动打开后端API文档
+        open_browser "$API_HEALTH_URL"
+        sleep 1
+        
+        # 自动打开前端应用
+        open_browser "$FRONTEND_URL"
+        
+        echo ""
+        print_success "🎉 开发环境启动完成！"
+        echo -e "${CYAN}📱 访问链接:${NC}"
+        echo -e "   🌐 前端应用: ${CYAN}${FRONTEND_URL}${NC}"
+        echo -e "   ⚡ 后端API: ${CYAN}${BACKEND_URL}${NC}"
+        echo -e "   💚 健康检查: ${CYAN}${API_HEALTH_URL}${NC}"
+        echo ""
+        print_info "浏览器已自动打开调试页面"
+        print_warning "按 Ctrl+C 停止所有服务"
+        echo ""
+    else
+        print_error "后端服务启动失败"
+    fi
+    
+    # 等待主进程
+    wait $SERVER_PID
 }
 
 # 主函数

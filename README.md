@@ -75,9 +75,8 @@
 ### 一键启动
 
 ```bash
-# 克隆项目
-git clone https://github.com/your-username/knowledge-base-management.git
-cd knowledge-base-management
+# 进入项目目录
+cd Project
 
 # 安装依赖
 npm install
@@ -155,50 +154,76 @@ docker run -d \
 
 ### 开发环境配置
 
-详细的开发环境配置请参考 [开发环境配置文档](./开发环境配置文档.md)。
+详细的开发环境配置请参考 [开发环境配置文档](./技术文档/开发环境配置文档.md)。
 
 ```bash
-# 安装前端依赖
-cd frontend
+# 进入项目目录
+cd Project
+
+# 安装所有依赖
 npm install
 
-# 安装后端依赖
-cd backend
-npm install
+# 初始化数据库
+npm run db:init
 
-# 启动开发服务器
+# 启动开发服务器（前后端同时启动）
 npm run dev
 ```
 
 ### 项目结构
 
 ```
-knowledge-base-management/
-├── frontend/                 # 前端应用
-│   ├── src/
-│   │   ├── components/       # 通用组件
-│   │   ├── pages/           # 页面组件
-│   │   ├── services/        # API服务
-│   │   ├── hooks/           # 自定义Hook
-│   │   └── types/           # 类型定义
-│   └── package.json
-├── backend/                  # 后端服务
-│   ├── src/
-│   │   ├── controllers/     # 控制器
-│   │   ├── services/        # 业务逻辑
-│   │   ├── models/          # 数据模型
-│   │   └── routes/          # 路由定义
-│   └── package.json
-├── database/                 # 数据库文件
-├── docs/                    # 项目文档
+testClass/                    # 团队知识库管理工具项目根目录
+├── Project/                  # 主要开发代码目录
+│   ├── frontend/            # 前端React应用
+│   │   ├── src/
+│   │   │   ├── components/  # 通用组件
+│   │   │   ├── pages/       # 页面组件
+│   │   │   ├── contexts/    # React上下文
+│   │   │   ├── hooks/       # 自定义Hook
+│   │   │   ├── services/    # API服务
+│   │   │   ├── types/       # TypeScript类型定义
+│   │   │   └── utils/       # 工具函数
+│   │   ├── public/          # 静态资源
+│   │   ├── package.json     # 前端依赖配置
+│   │   └── vite.config.ts   # Vite构建配置
+│   ├── backend/             # 后端Node.js服务
+│   │   ├── src/
+│   │   │   ├── controllers/ # 控制器
+│   │   │   ├── services/    # 业务逻辑
+│   │   │   ├── models/      # 数据模型
+│   │   │   ├── routes/      # 路由定义
+│   │   │   ├── middleware/  # 中间件
+│   │   │   ├── database/    # 数据库配置
+│   │   │   └── utils/       # 工具函数
+│   │   ├── uploads/         # 文件上传目录
+│   │   └── package.json     # 后端依赖配置
+│   ├── scripts/             # 构建和部署脚本
+│   │   ├── build.sh         # 构建脚本
+│   │   └── dev.sh           # 开发启动脚本
+│   ├── docs/                # 项目内部文档
+│   │   └── DEVELOPMENT.md   # 开发指南
+│   ├── package.json         # 工作空间配置
+│   └── docker-compose.yml   # Docker编排配置
+├── 设计文档/                 # 项目设计文档
 │   ├── 需求分析文档.md
 │   ├── 系统设计文档.md
 │   ├── 数据库设计文档.md
 │   ├── API接口设计文档.md
+│   └── 自动化测试计划.md
+├── 技术文档/                 # 技术实现文档
 │   ├── 架构设计文档.md
+│   ├── 开发环境配置文档.md
 │   ├── 部署说明文档.md
-│   └── 开发环境配置文档.md
-└── README.md
+│   └── 性能优化指南.md
+├── 项目管理文档/             # 项目管理相关
+│   ├── 开发计划文档.md
+│   ├── 测试计划文档.md
+│   └── 项目进度跟踪.md
+├── 简化项目开发计划.md       # 精简版开发计划
+├── 项目题目.md               # 项目需求和目标
+├── README.md                 # 项目说明文档
+└── CLAUDE.md                 # AI助手交互记录
 ```
 
 ### API 接口
@@ -229,7 +254,7 @@ PUT    /api/v1/tags/:id      // 更新标签
 DELETE /api/v1/tags/:id      // 删除标签
 ```
 
-完整的API文档请参考 [API接口设计文档](./API接口设计文档.md)。
+完整的API文档请参考 [API接口设计文档](./设计文档/API接口设计文档.md)。
 
 ### 测试
 
@@ -251,7 +276,7 @@ npm run test:coverage
 
 ### 生产环境部署
 
-详细的部署指南请参考 [部署说明文档](./部署说明文档.md)。
+详细的部署指南请参考 [部署说明文档](./技术文档/部署说明文档.md)。
 
 #### 传统部署
 

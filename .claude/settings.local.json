@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(tree:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(sqlite3:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

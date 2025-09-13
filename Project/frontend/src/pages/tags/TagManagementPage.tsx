@@ -18,7 +18,14 @@ export default function TagManagementPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Title level={2} style={{ margin: 0 }}>
           标签管理
         </Title>
@@ -31,17 +38,17 @@ export default function TagManagementPage() {
         <Paragraph type="secondary" style={{ marginBottom: 16 }}>
           系统已预设了8个基础标签，您可以在此基础上创建更多标签
         </Paragraph>
-        
+
         <Space wrap size="middle">
           {mockTags.map((tag, index) => (
             <Tag
               key={index}
               color={tag.color}
               icon={<TagsOutlined />}
-              style={{ 
-                padding: '4px 12px', 
+              style={{
+                padding: '4px 12px',
                 fontSize: '14px',
-                borderRadius: '16px'
+                borderRadius: '16px',
               }}
             >
               {tag.name}

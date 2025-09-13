@@ -20,10 +20,14 @@ export default function SearchPage() {
             placeholder="输入关键词搜索文档..."
             size="large"
             allowClear
-            enterButton={<Button type="primary" icon={<SearchOutlined />}>搜索</Button>}
-            onSearch={(value) => console.log('搜索:', value)}
+            enterButton={
+              <Button type="primary" icon={<SearchOutlined />}>
+                搜索
+              </Button>
+            }
+            onSearch={value => console.log('搜索:', value)}
           />
-          
+
           <div>
             <Space>
               <span>热门标签:</span>
@@ -47,15 +51,13 @@ export default function SearchPage() {
             </div>
           </Card>
         </Col>
-        
+
         <Col span={18}>
           <Card title="搜索结果">
             <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
               <SearchOutlined style={{ fontSize: 48, marginBottom: 16 }} />
               <div style={{ fontSize: 16 }}>请输入关键词开始搜索</div>
-              <Paragraph type="secondary">
-                支持按文档标题、标签和文件类型搜索
-              </Paragraph>
+              <Paragraph type="secondary">支持按文档标题、标签和文件类型搜索</Paragraph>
             </div>
           </Card>
         </Col>

@@ -81,13 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initializeAuth = async () => {
       const token = localStorage.getItem('accessToken');
       const storedUser = authService.getStoredUser();
-      
+
       if (token && storedUser) {
         try {
           const user = await authService.getUserInfo();
-          dispatch({ 
-            type: 'AUTH_SUCCESS', 
-            payload: { user, token } 
+          dispatch({
+            type: 'AUTH_SUCCESS',
+            payload: { user, token },
           });
         } catch (error) {
           console.error('Token validation failed:', error);
@@ -97,9 +97,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const user = await authService.getUserInfo();
           localStorage.setItem('user', JSON.stringify(user));
-          dispatch({ 
-            type: 'AUTH_SUCCESS', 
-            payload: { user, token } 
+          dispatch({
+            type: 'AUTH_SUCCESS',
+            payload: { user, token },
           });
         } catch (error) {
           console.error('Get user info failed:', error);
@@ -114,19 +114,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
       dispatch({ type: 'AUTH_START' });
-      
+
       const response = await authService.login(credentials);
       const { user, accessToken, refreshToken } = response.data;
-      
+
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
-      
-      dispatch({ 
-        type: 'AUTH_SUCCESS', 
-        payload: { user, token: accessToken } 
+
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user, token: accessToken },
       });
-      
+
       message.success(response.message || '登录成功');
       return true;
     } catch (error: any) {
@@ -140,19 +140,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
       dispatch({ type: 'AUTH_START' });
-      
+
       const response = await authService.register(userData);
       const { user, accessToken, refreshToken } = response.data;
-      
+
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
-      
-      dispatch({ 
-        type: 'AUTH_SUCCESS', 
-        payload: { user, token: accessToken } 
+
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user, token: accessToken },
       });
-      
+
       message.success(response.message || '注册成功');
       return true;
     } catch (error: any) {
@@ -191,14 +191,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      state,
-      login,
-      register,
-      logout,
-      updateUser,
-      refreshUserInfo,
-    }}>
+    <AuthContext.Provider
+      value={{
+        state,
+        login,
+        register,
+        logout,
+        updateUser,
+        refreshUserInfo,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

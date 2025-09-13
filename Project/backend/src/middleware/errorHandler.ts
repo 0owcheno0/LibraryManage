@@ -17,7 +17,7 @@ export const errorHandler = (
     stack: error.stack,
     url: req.url,
     method: req.method,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   // 数据库错误
@@ -25,7 +25,7 @@ export const errorHandler = (
     const response: ApiResponse = {
       code: 500,
       message: '数据库操作失败',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     res.status(500).json(response);
     return;
@@ -36,7 +36,7 @@ export const errorHandler = (
     const response: ApiResponse = {
       code: 401,
       message: '认证失败，请重新登录',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     res.status(401).json(response);
     return;
@@ -47,7 +47,7 @@ export const errorHandler = (
     const response: ApiResponse = {
       code: 400,
       message: '文件上传失败',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     res.status(400).json(response);
     return;
@@ -60,7 +60,7 @@ export const errorHandler = (
   const response: ApiResponse = {
     code: statusCode,
     message: process.env.NODE_ENV === 'development' ? message : '服务器内部错误',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   res.status(statusCode).json(response);

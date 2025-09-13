@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import {
-  Layout,
-  Menu,
-  Avatar,
-  Dropdown,
-  Typography,
-  Button,
-  theme
-} from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, theme } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -17,7 +9,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   MenuOutlined,
-  SettingOutlined
+  SettingOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -89,14 +81,16 @@ export default function MainLayout() {
           borderRight: `1px solid ${token.colorBorderSecondary}`,
         }}
       >
-        <div style={{
-          height: 64,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          padding: collapsed ? 0 : '0 24px',
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        }}>
+        <div
+          style={{
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            padding: collapsed ? 0 : '0 24px',
+            borderBottom: `1px solid ${token.colorBorderSecondary}`,
+          }}
+        >
           {!collapsed && (
             <Title level={4} style={{ margin: 0, color: token.colorPrimary }}>
               知识库
@@ -108,7 +102,7 @@ export default function MainLayout() {
             </Title>
           )}
         </div>
-        
+
         <Menu
           mode="inline"
           selectedKeys={[location.pathname]}
@@ -117,16 +111,18 @@ export default function MainLayout() {
           style={{ border: 'none' }}
         />
       </Sider>
-      
+
       <Layout>
-        <Header style={{
-          padding: '0 24px',
-          background: token.colorBgContainer,
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
+        <Header
+          style={{
+            padding: '0 24px',
+            background: token.colorBgContainer,
+            borderBottom: `1px solid ${token.colorBorderSecondary}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <Button
             type="text"
             icon={<MenuOutlined />}
@@ -137,14 +133,10 @@ export default function MainLayout() {
               height: 40,
             }}
           />
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <span>欢迎，{state.user?.fullName || '用户'}</span>
-            <Dropdown
-              menu={{ items: userMenuItems }}
-              placement="bottomRight"
-              trigger={['click']}
-            >
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
               <Avatar
                 size="default"
                 icon={<UserOutlined />}
@@ -154,13 +146,15 @@ export default function MainLayout() {
             </Dropdown>
           </div>
         </Header>
-        
-        <Content style={{
-          margin: '24px',
-          padding: '24px',
-          background: token.colorBgContainer,
-          borderRadius: token.borderRadius,
-        }}>
+
+        <Content
+          style={{
+            margin: '24px',
+            padding: '24px',
+            background: token.colorBgContainer,
+            borderRadius: token.borderRadius,
+          }}
+        >
           <Outlet />
         </Content>
       </Layout>

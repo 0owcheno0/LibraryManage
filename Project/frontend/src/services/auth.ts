@@ -54,7 +54,7 @@ class AuthService {
   }
 
   private setupInterceptors() {
-    this.api.interceptors.request.use((config) => {
+    this.api.interceptors.request.use(config => {
       const token = localStorage.getItem('accessToken');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -63,8 +63,8 @@ class AuthService {
     });
 
     this.api.interceptors.response.use(
-      (response) => response,
-      async (error) => {
+      response => response,
+      async error => {
         if (error.response?.status === 401) {
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
@@ -72,7 +72,7 @@ class AuthService {
               const refreshResponse = await this.refreshToken(refreshToken);
               localStorage.setItem('accessToken', refreshResponse.data.accessToken);
               localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
-              
+
               error.config.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
               return this.api.request(error.config);
             } catch (refreshError) {

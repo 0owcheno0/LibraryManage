@@ -4,7 +4,7 @@ async function startServer() {
   try {
     // 暂时跳过数据库连接，使用模拟数据
     console.log('✅ 数据库连接跳过（开发模式）');
-    
+
     // 启动服务器
     app.listen(PORT, () => {
       console.log(`
@@ -16,7 +16,6 @@ async function startServer() {
 ⏰ 启动时间: ${new Date().toLocaleString()}
       `);
     });
-    
   } catch (error) {
     console.error('❌ 服务器启动失败:', error);
     process.exit(1);
@@ -24,7 +23,7 @@ async function startServer() {
 }
 
 // 处理未捕获的异常
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('未捕获的异常:', error);
   process.exit(1);
 });

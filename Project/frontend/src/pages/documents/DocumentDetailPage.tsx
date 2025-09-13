@@ -27,12 +27,8 @@ export default function DocumentDetailPage() {
       <Card>
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <Title level={3}>文档详情页面</Title>
-          <Paragraph type="secondary">
-            文档ID: {id}
-          </Paragraph>
-          <Paragraph type="secondary">
-            该页面用于显示文档的详细信息、预览和操作
-          </Paragraph>
+          <Paragraph type="secondary">文档ID: {id}</Paragraph>
+          <Paragraph type="secondary">该页面用于显示文档的详细信息、预览和操作</Paragraph>
         </div>
       </Card>
     </div>

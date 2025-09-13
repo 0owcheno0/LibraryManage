@@ -7,7 +7,7 @@
 ```
 Project/
 ├── frontend/                 # 前端React应用
-├── backend/                  # 后端Node.js应用  
+├── backend/                  # 后端Node.js应用
 ├── database/                 # 数据库相关文件
 ├── tests/                    # 测试文件
 ├── scripts/                  # 构建和部署脚本
@@ -17,6 +17,7 @@ Project/
 ## 快速开始
 
 ### 后端启动
+
 ```bash
 cd backend
 npm install
@@ -24,6 +25,7 @@ npm run dev
 ```
 
 ### 前端启动
+
 ```bash
 cd frontend
 npm install
@@ -31,6 +33,7 @@ npm run dev
 ```
 
 ### 数据库初始化
+
 ```bash
 npm run db:init
 npm run db:seed

@@ -22,13 +22,16 @@ function App() {
           {/* 公开路由 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
+
           {/* 私有路由 */}
-          <Route path="/" element={
-            <PrivateRoute>
-              <MainLayout />
-            </PrivateRoute>
-          }>
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <MainLayout />
+              </PrivateRoute>
+            }
+          >
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="documents" element={<DocumentListPage />} />
@@ -37,7 +40,7 @@ function App() {
             <Route path="search" element={<SearchPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
-          
+
           {/* 404重定向 */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

@@ -86,15 +86,11 @@ export default function DashboardPage() {
       <Title level={3} style={{ marginBottom: 16 }}>
         快速操作
       </Title>
-      
+
       <Row gutter={[16, 16]}>
         {quickActions.map((action, index) => (
           <Col xs={24} sm={12} lg={8} key={index}>
-            <Card
-              hoverable
-              onClick={action.onClick}
-              style={{ height: '100%', cursor: 'pointer' }}
-            >
+            <Card hoverable onClick={action.onClick} style={{ height: '100%', cursor: 'pointer' }}>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 32, color: '#1890ff', marginBottom: 16 }}>
                   {action.icon}
@@ -102,9 +98,7 @@ export default function DashboardPage() {
                 <Title level={4} style={{ marginBottom: 8 }}>
                   {action.title}
                 </Title>
-                <Paragraph type="secondary">
-                  {action.description}
-                </Paragraph>
+                <Paragraph type="secondary">{action.description}</Paragraph>
               </div>
             </Card>
           </Col>
@@ -115,7 +109,10 @@ export default function DashboardPage() {
         <Col span={12}>
           <Card title="最近文档" extra={<Button type="link">查看全部</Button>}>
             <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
-              暂无文档，<Button type="link" onClick={() => navigate('/documents')}>立即上传</Button>
+              暂无文档，
+              <Button type="link" onClick={() => navigate('/documents')}>
+                立即上传
+              </Button>
             </div>
           </Card>
         </Col>
@@ -124,7 +121,9 @@ export default function DashboardPage() {
             <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
               <Space direction="vertical">
                 <span>系统预设了8个基础标签</span>
-                <Button type="link" onClick={() => navigate('/tags')}>管理标签</Button>
+                <Button type="link" onClick={() => navigate('/tags')}>
+                  管理标签
+                </Button>
               </Space>
             </div>
           </Card>

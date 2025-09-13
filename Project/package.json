@@ -17,15 +17,18 @@
     "test:coverage": "npm run test:coverage:frontend && npm run test:coverage:backend",
     "test:coverage:frontend": "cd frontend && npm run test:coverage",
     "test:coverage:backend": "cd backend && npm run test:coverage",
-    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --ignore-path .eslintignore",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix --ignore-path .eslintignore",
     "lint:frontend": "cd frontend && npm run lint",
     "lint:backend": "cd backend && npm run lint",
-    "lint:fix": "npm run lint:fix:frontend && npm run lint:fix:backend",
     "lint:fix:frontend": "cd frontend && npm run lint:fix",
     "lint:fix:backend": "cd backend && npm run lint:fix",
-    "format": "npm run format:frontend && npm run format:backend",
+    "format": "prettier --write . --ignore-path .prettierignore",
+    "format:check": "prettier --check . --ignore-path .prettierignore",
     "format:frontend": "cd frontend && npm run format",
     "format:backend": "cd backend && npm run format",
+    "code:check": "npm run lint && npm run format:check",
+    "code:fix": "npm run lint:fix && npm run format",
     "install:all": "npm install && npm run install:frontend && npm run install:backend",
     "install:frontend": "cd frontend && npm install",
     "install:backend": "cd backend && npm install",
@@ -42,7 +45,17 @@
     "backend"
   ],
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.48.0",
+    "eslint-plugin-jest": "^27.4.2",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3"
   },
   "keywords": [
     "knowledge-base",
@@ -53,5 +66,20 @@
     "typescript"
   ],
   "author": "团队知识库项目组",
-  "license": "MIT"
+  "license": "MIT",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css,scss}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run code:check"
+    }
+  }
 }

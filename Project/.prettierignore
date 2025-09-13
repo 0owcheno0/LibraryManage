@@ -1,0 +1,90 @@
+# 依赖文件
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 构建输出
+dist/
+build/
+.next/
+.nuxt/
+.output/
+.vercel/
+.netlify/
+
+# 缓存文件
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量文件
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# 编辑器和IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 上传文件
+uploads/
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.7z
+*.rar
+
+# 证书和密钥
+*.pem
+*.key
+*.crt
+*.cert
+
+# 文档生成
+docs/.vuepress/dist/
+docs/.vitepress/dist/
+
+# 特定格式文件 (已有格式化)
+*.min.js
+*.min.css
+*.bundle.js
+*.chunk.js
+
+# 配置文件 (可能需要特殊格式)
+*.config.js
+*.config.ts
+vite.config.ts
+jest.config.js
+webpack.config.js
+
+# README 和许可证 (保持原始格式)
+LICENSE*
+CHANGELOG*

@@ -26,7 +26,7 @@ class RequestService {
   private setupInterceptors() {
     // 请求拦截器
     this.instance.interceptors.request.use(
-      (config) => {
+      config => {
         // 添加认证token
         const token = localStorage.getItem('token');
         if (token) {
@@ -44,7 +44,7 @@ class RequestService {
 
         return config;
       },
-      (error) => {
+      error => {
         return Promise.reject(error);
       }
     );
@@ -61,11 +61,11 @@ class RequestService {
 
         return response;
       },
-      (error) => {
+      error => {
         // 处理响应错误
         if (error.response) {
           const { status, data } = error.response;
-          
+
           switch (status) {
             case 401:
               // 未授权，清除token并跳转到登录页
@@ -91,7 +91,7 @@ class RequestService {
           message.error('网络连接失败，请检查网络设置');
         } else {
           // 其他错误
-          message.error('请求出错：' + error.message);
+          message.error(`请求出错：${error.message}`);
         }
 
         return Promise.reject(error);
@@ -120,18 +120,24 @@ class RequestService {
   }
 
   // 文件上传
-  public upload<T>(url: string, formData: FormData, onProgress?: (percent: number) => void): Promise<ApiResponse<T>> {
-    return this.instance.post(url, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent) => {
-        if (onProgress && progressEvent.total) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          onProgress(percent);
-        }
-      },
-    }).then(res => res.data);
+  public upload<T>(
+    url: string,
+    formData: FormData,
+    onProgress?: (percent: number) => void
+  ): Promise<ApiResponse<T>> {
+    return this.instance
+      .post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: progressEvent => {
+          if (onProgress && progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent);
+          }
+        },
+      })
+      .then(res => res.data);
   }
 }
 

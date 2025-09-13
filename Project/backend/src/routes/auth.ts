@@ -15,7 +15,7 @@ router.post('/register', async (req: Request, res: Response) => {
       res.status(400).json({
         code: 400,
         message: error.details[0]?.message || '验证失败',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -26,7 +26,7 @@ router.post('/register', async (req: Request, res: Response) => {
       res.status(409).json({
         code: 409,
         message: '该邮箱已被注册',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -35,7 +35,7 @@ router.post('/register', async (req: Request, res: Response) => {
       res.status(409).json({
         code: 409,
         message: '该用户名已被注册',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -44,12 +44,12 @@ router.post('/register', async (req: Request, res: Response) => {
     const user = await UserModel.create({
       email,
       username,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     const tokens = jwtUtils.generateTokens({
       userId: user.id,
-      email: user.email
+      email: user.email,
     });
 
     res.status(201).json({
@@ -57,16 +57,16 @@ router.post('/register', async (req: Request, res: Response) => {
       message: '注册成功',
       data: {
         user: UserModel.toProfile(user),
-        ...tokens
+        ...tokens,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
       code: 500,
       message: '注册失败，请稍后重试',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -79,7 +79,7 @@ router.post('/login', async (req: Request, res: Response) => {
       res.status(400).json({
         code: 400,
         message: error.details[0]?.message || '验证失败',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -91,7 +91,7 @@ router.post('/login', async (req: Request, res: Response) => {
       res.status(401).json({
         code: 401,
         message: '邮箱或密码错误',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -101,14 +101,14 @@ router.post('/login', async (req: Request, res: Response) => {
       res.status(401).json({
         code: 401,
         message: '邮箱或密码错误',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
 
     const tokens = jwtUtils.generateTokens({
       userId: user.id,
-      email: user.email
+      email: user.email,
     });
 
     res.status(200).json({
@@ -116,16 +116,16 @@ router.post('/login', async (req: Request, res: Response) => {
       message: '登录成功',
       data: {
         user: UserModel.toProfile(user),
-        ...tokens
+        ...tokens,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
       code: 500,
       message: '登录失败，请稍后重试',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -138,7 +138,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
       res.status(400).json({
         code: 400,
         message: error.details[0]?.message || '验证失败',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -150,14 +150,14 @@ router.post('/refresh', async (req: Request, res: Response) => {
       code: 200,
       message: 'Token刷新成功',
       data: tokens,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Token refresh error:', error);
     res.status(401).json({
       code: 401,
       message: '刷新Token无效或已过期',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -167,7 +167,7 @@ router.post('/logout', authenticate, (req: AuthenticatedRequest, res: Response) 
   res.status(200).json({
     code: 200,
     message: '登出成功',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -178,7 +178,7 @@ router.get('/me', authenticate, async (req: AuthenticatedRequest, res: Response)
       res.status(401).json({
         code: 401,
         message: '未认证用户',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -188,7 +188,7 @@ router.get('/me', authenticate, async (req: AuthenticatedRequest, res: Response)
       res.status(404).json({
         code: 404,
         message: '用户不存在',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
       return;
     }
@@ -197,14 +197,14 @@ router.get('/me', authenticate, async (req: AuthenticatedRequest, res: Response)
       code: 200,
       message: '获取用户信息成功',
       data: UserModel.toProfile(user),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error('Get user info error:', error);
     res.status(500).json({
       code: 500,
       message: '获取用户信息失败',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });

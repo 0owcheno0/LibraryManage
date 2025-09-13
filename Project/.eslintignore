@@ -1,0 +1,73 @@
+# 依赖和构建文件
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+
+# 缓存文件
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+.eslintcache
+
+# 配置文件
+*.config.js
+*.config.ts
+vite.config.ts
+jest.config.js
+webpack.config.js
+rollup.config.js
+postcss.config.js
+tailwind.config.js
+
+# 第三方库和压缩文件
+*.min.js
+*.min.css
+*.bundle.js
+*.chunk.js
+vendor/
+lib/
+libs/
+
+# 数据库和上传文件
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+public/uploads/
+
+# 日志文件
+logs/
+*.log
+
+# 环境和系统文件
+.env*
+.DS_Store
+Thumbs.db
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 测试文件 (如果需要单独配置)
+# __tests__/
+# **/*.test.ts
+# **/*.spec.ts
+
+# 自动生成的文件
+**/*generated*
+**/*auto*
+types/generated/
+
+# 文档
+*.md
+docs/
+
+# 特定项目文件
+schema.sql
+init.sql
+seed.sql

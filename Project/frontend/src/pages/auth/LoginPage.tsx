@@ -23,7 +23,7 @@ export default function LoginPage() {
   const onFinish = async (values: LoginForm) => {
     const success = await login({
       email: values.email,
-      password: values.password
+      password: values.password,
     });
     if (success) {
       navigate(from, { replace: true });
@@ -31,13 +31,20 @@ export default function LoginPage() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <Content style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '20px',
-      }}>
+    <Layout
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}
+    >
+      <Content
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '20px',
+        }}
+      >
         <Card
           style={{
             width: '100%',
@@ -52,13 +59,7 @@ export default function LoginPage() {
             <Text type="secondary">登录到您的账户</Text>
           </div>
 
-          <Form
-            form={form}
-            name="login"
-            onFinish={onFinish}
-            autoComplete="off"
-            size="large"
-          >
+          <Form form={form} name="login" onFinish={onFinish} autoComplete="off" size="large">
             <Form.Item
               name="email"
               rules={[
@@ -66,10 +67,7 @@ export default function LoginPage() {
                 { type: 'email', message: '请输入有效的邮箱地址' },
               ]}
             >
-              <Input
-                prefix={<UserOutlined />}
-                placeholder="邮箱地址"
-              />
+              <Input prefix={<UserOutlined />} placeholder="邮箱地址" />
             </Form.Item>
 
             <Form.Item
@@ -79,19 +77,11 @@ export default function LoginPage() {
                 { min: 6, message: '密码至少6位' },
               ]}
             >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="密码"
-              />
+              <Input.Password prefix={<LockOutlined />} placeholder="密码" />
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={state.isLoading}
-                block
-              >
+              <Button type="primary" htmlType="submit" loading={state.isLoading} block>
                 登录
               </Button>
             </Form.Item>
@@ -112,8 +102,10 @@ export default function LoginPage() {
 
           <div style={{ marginTop: 24, padding: 16, background: '#f0f2f5', borderRadius: 6 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              <strong>测试账号：</strong><br />
-              邮箱：admin@example.com<br />
+              <strong>测试账号：</strong>
+              <br />
+              邮箱：admin@example.com
+              <br />
               密码：admin123
             </Text>
           </div>

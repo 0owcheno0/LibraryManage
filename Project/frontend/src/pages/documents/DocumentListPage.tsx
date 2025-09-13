@@ -51,7 +51,7 @@ export default function DocumentListPage() {
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   const columns: ColumnsType<Document> = [
@@ -71,7 +71,7 @@ export default function DocumentListPage() {
       title: '文件大小',
       dataIndex: 'fileSize',
       key: 'fileSize',
-      render: (size) => formatFileSize(size),
+      render: size => formatFileSize(size),
       width: 100,
     },
     {
@@ -86,7 +86,7 @@ export default function DocumentListPage() {
       key: 'tags',
       render: (tags: string[]) => (
         <Space wrap>
-          {tags.map((tag) => (
+          {tags.map(tag => (
             <Tag key={tag} color="blue">
               {tag}
             </Tag>
@@ -141,15 +141,18 @@ export default function DocumentListPage() {
 
   return (
     <div>
-      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Title level={2} style={{ margin: 0 }}>
           文档管理
         </Title>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setUploadVisible(true)}
-        >
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setUploadVisible(true)}>
           上传文档
         </Button>
       </div>
@@ -162,14 +165,12 @@ export default function DocumentListPage() {
           pagination={{
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 条记录`,
+            showTotal: total => `共 ${total} 条记录`,
           }}
           locale={{
             emptyText: (
               <div style={{ padding: '40px 0', textAlign: 'center' }}>
-                <div style={{ marginBottom: 16, fontSize: 16, color: '#999' }}>
-                  暂无文档数据
-                </div>
+                <div style={{ marginBottom: 16, fontSize: 16, color: '#999' }}>暂无文档数据</div>
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
@@ -193,11 +194,7 @@ export default function DocumentListPage() {
         onOk={() => form.submit()}
         width={600}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleUpload}
-        >
+        <Form form={form} layout="vertical" onFinish={handleUpload}>
           <Form.Item
             name="file"
             label="选择文件"
@@ -213,9 +210,7 @@ export default function DocumentListPage() {
                 <UploadOutlined />
               </p>
               <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-              <p className="ant-upload-hint">
-                支持 PDF、Word、Excel、PowerPoint、文本和图片文件
-              </p>
+              <p className="ant-upload-hint">支持 PDF、Word、Excel、PowerPoint、文本和图片文件</p>
             </Upload.Dragger>
           </Form.Item>
 
@@ -227,20 +222,11 @@ export default function DocumentListPage() {
             <Input placeholder="请输入文档标题" />
           </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="文档描述"
-          >
-            <TextArea
-              rows={3}
-              placeholder="请输入文档描述（可选）"
-            />
+          <Form.Item name="description" label="文档描述">
+            <TextArea rows={3} placeholder="请输入文档描述（可选）" />
           </Form.Item>
 
-          <Form.Item
-            name="tags"
-            label="标签"
-          >
+          <Form.Item name="tags" label="标签">
             <Select
               mode="multiple"
               placeholder="选择标签"
@@ -254,11 +240,7 @@ export default function DocumentListPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            name="visibility"
-            label="可见性"
-            initialValue={2}
-          >
+          <Form.Item name="visibility" label="可见性" initialValue={2}>
             <Select>
               <Select.Option value={1}>私有</Select.Option>
               <Select.Option value={2}>团队</Select.Option>

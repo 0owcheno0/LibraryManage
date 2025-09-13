@@ -8,11 +8,11 @@ interface LoadingProps {
   children?: React.ReactNode;
 }
 
-export function Loading({ 
-  size = 'default', 
-  tip = '加载中...', 
+export function Loading({
+  size = 'default',
+  tip = '加载中...',
   spinning = true,
-  children 
+  children,
 }: LoadingProps) {
   if (children) {
     return (
@@ -23,12 +23,14 @@ export function Loading({
   }
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      minHeight: '200px' 
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '200px',
+      }}
+    >
       <Spin size={size} tip={tip} />
     </div>
   );

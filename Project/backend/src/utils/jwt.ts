@@ -28,25 +28,21 @@ class JWTUtils {
   }
 
   generateAccessToken(payload: Omit<TokenPayload, 'type'>): string {
-    return jwt.sign(
-      { ...payload, type: 'access' },
-      this.accessTokenSecret,
-      { expiresIn: this.accessTokenExpiry } as jwt.SignOptions
-    );
+    return jwt.sign({ ...payload, type: 'access' }, this.accessTokenSecret, {
+      expiresIn: this.accessTokenExpiry,
+    } as jwt.SignOptions);
   }
 
   generateRefreshToken(payload: Omit<TokenPayload, 'type'>): string {
-    return jwt.sign(
-      { ...payload, type: 'refresh' },
-      this.refreshTokenSecret,
-      { expiresIn: this.refreshTokenExpiry } as jwt.SignOptions
-    );
+    return jwt.sign({ ...payload, type: 'refresh' }, this.refreshTokenSecret, {
+      expiresIn: this.refreshTokenExpiry,
+    } as jwt.SignOptions);
   }
 
   generateTokens(payload: Omit<TokenPayload, 'type'>): UserTokens {
     return {
       accessToken: this.generateAccessToken(payload),
-      refreshToken: this.generateRefreshToken(payload)
+      refreshToken: this.generateRefreshToken(payload),
     };
   }
 
@@ -78,7 +74,7 @@ class JWTUtils {
     const decoded = this.verifyRefreshToken(refreshToken);
     const payload = {
       userId: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
     };
     return this.generateTokens(payload);
   }

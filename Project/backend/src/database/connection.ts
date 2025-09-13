@@ -14,8 +14,9 @@ export class DatabaseConnection {
 
   private constructor() {
     // 获取数据库路径，支持环境变量配置
-    this.dbPath = process.env.DB_PATH || path.join(__dirname, '../../../database/knowledge_base.db');
-    
+    this.dbPath =
+      process.env.DB_PATH || path.join(__dirname, '../../../database/knowledge_base.db');
+
     // 确保数据库目录存在
     const dbDir = path.dirname(this.dbPath);
     if (!fs.existsSync(dbDir)) {
@@ -25,7 +26,7 @@ export class DatabaseConnection {
     // 初始化数据库连接
     // this.db = new Database(this.dbPath);
     console.log(`数据库路径: ${this.dbPath}`);
-    
+
     // 配置数据库
     this.configureDatabase();
   }
@@ -53,19 +54,19 @@ export class DatabaseConnection {
   private configureDatabase(): void {
     // 启用WAL模式，提高并发性能
     this.db.pragma('journal_mode = WAL');
-    
+
     // 启用外键约束
     this.db.pragma('foreign_keys = ON');
-    
+
     // 设置同步模式
     this.db.pragma('synchronous = NORMAL');
-    
+
     // 设置缓存大小 (64MB)
     this.db.pragma('cache_size = -65536');
-    
+
     // 设置临时存储为内存
     this.db.pragma('temp_store = MEMORY');
-    
+
     // 设置mmap大小 (256MB)
     this.db.pragma('mmap_size = 268435456');
   }
@@ -94,16 +95,20 @@ export class DatabaseConnection {
 
       // 检查表是否存在
       const tables = ['users', 'documents', 'tags'];
-      const tableCheck = this.db.prepare(`
+      const tableCheck = this.db
+        .prepare(
+          `
         SELECT name FROM sqlite_master 
         WHERE type='table' AND name IN (${tables.map(() => '?').join(',')})
-      `).all(...tables);
+      `
+        )
+        .all(...tables);
 
       if (tableCheck.length !== tables.length) {
-        return { 
-          status: 'warning', 
+        return {
+          status: 'warning',
           message: '部分数据表缺失',
-          details: { expected: tables.length, found: tableCheck.length }
+          details: { expected: tables.length, found: tableCheck.length },
         };
       }
 
@@ -114,18 +119,18 @@ export class DatabaseConnection {
         page_size: this.db.pragma('page_size', { simple: true }),
         user_count: this.db.prepare('SELECT COUNT(*) as count FROM users').get(),
         document_count: this.db.prepare('SELECT COUNT(*) as count FROM documents').get(),
-        tag_count: this.db.prepare('SELECT COUNT(*) as count FROM tags').get()
+        tag_count: this.db.prepare('SELECT COUNT(*) as count FROM tags').get(),
       };
 
-      return { 
-        status: 'healthy', 
+      return {
+        status: 'healthy',
         message: '数据库运行正常',
-        details: stats
+        details: stats,
       };
     } catch (error) {
-      return { 
-        status: 'error', 
-        message: `数据库健康检查失败: ${error instanceof Error ? error.message : '未知错误'}`
+      return {
+        status: 'error',
+        message: `数据库健康检查失败: ${error instanceof Error ? error.message : '未知错误'}`,
       };
     }
   }
@@ -159,10 +164,10 @@ export class DatabaseConnection {
   public optimize(): void {
     // 分析数据库统计信息
     this.db.exec('ANALYZE');
-    
+
     // 清理和优化
     this.db.exec('VACUUM');
-    
+
     // 重建索引
     this.db.exec('REINDEX');
   }

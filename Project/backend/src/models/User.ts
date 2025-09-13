@@ -48,7 +48,7 @@ export class UserModel {
       id: Date.now().toString(),
       ...userData,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
     users.push(user);
     return user;
@@ -67,7 +67,7 @@ export class UserModel {
       id: user.id,
       email: user.email,
       username: user.username,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
     };
   }
 }

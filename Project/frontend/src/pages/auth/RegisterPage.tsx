@@ -28,13 +28,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-      <Content style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '20px',
-      }}>
+    <Layout
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}
+    >
+      <Content
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '20px',
+        }}
+      >
         <Card
           style={{
             width: '100%',
@@ -49,13 +56,7 @@ export default function RegisterPage() {
             <Text type="secondary">创建新账户</Text>
           </div>
 
-          <Form
-            form={form}
-            name="register"
-            onFinish={onFinish}
-            autoComplete="off"
-            size="large"
-          >
+          <Form form={form} name="register" onFinish={onFinish} autoComplete="off" size="large">
             <Form.Item
               name="username"
               rules={[
@@ -65,10 +66,7 @@ export default function RegisterPage() {
                 { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线' },
               ]}
             >
-              <Input
-                prefix={<UserOutlined />}
-                placeholder="用户名"
-              />
+              <Input prefix={<UserOutlined />} placeholder="用户名" />
             </Form.Item>
 
             <Form.Item
@@ -78,12 +76,8 @@ export default function RegisterPage() {
                 { type: 'email', message: '请输入有效的邮箱地址' },
               ]}
             >
-              <Input
-                prefix={<MailOutlined />}
-                placeholder="邮箱地址"
-              />
+              <Input prefix={<MailOutlined />} placeholder="邮箱地址" />
             </Form.Item>
-
 
             <Form.Item
               name="password"
@@ -92,10 +86,7 @@ export default function RegisterPage() {
                 { min: 6, message: '密码至少6位' },
               ]}
             >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="密码"
-              />
+              <Input.Password prefix={<LockOutlined />} placeholder="密码" />
             </Form.Item>
 
             <Form.Item
@@ -113,19 +104,11 @@ export default function RegisterPage() {
                 }),
               ]}
             >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="确认密码"
-              />
+              <Input.Password prefix={<LockOutlined />} placeholder="确认密码" />
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={state.isLoading}
-                block
-              >
+              <Button type="primary" htmlType="submit" loading={state.isLoading} block>
                 注册
               </Button>
             </Form.Item>

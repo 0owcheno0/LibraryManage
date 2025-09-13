@@ -77,13 +77,19 @@ directories.forEach(([dir, desc]) => {
 });
 
 console.log('\n📊 框架搭建总结:');
-console.log(`后端框架完成度: ${backendSuccess}/${backendFiles.length} (${Math.round(backendSuccess/backendFiles.length*100)}%)`);
-console.log(`前端框架完成度: ${frontendSuccess}/${frontendFiles.length} (${Math.round(frontendSuccess/frontendFiles.length*100)}%)`);
-console.log(`目录结构完成度: ${dirSuccess}/${directories.length} (${Math.round(dirSuccess/directories.length*100)}%)`);
+console.log(
+  `后端框架完成度: ${backendSuccess}/${backendFiles.length} (${Math.round((backendSuccess / backendFiles.length) * 100)}%)`
+);
+console.log(
+  `前端框架完成度: ${frontendSuccess}/${frontendFiles.length} (${Math.round((frontendSuccess / frontendFiles.length) * 100)}%)`
+);
+console.log(
+  `目录结构完成度: ${dirSuccess}/${directories.length} (${Math.round((dirSuccess / directories.length) * 100)}%)`
+);
 
 const totalFiles = backendFiles.length + frontendFiles.length + directories.length;
 const totalSuccess = backendSuccess + frontendSuccess + dirSuccess;
-const completionRate = Math.round(totalSuccess/totalFiles*100);
+const completionRate = Math.round((totalSuccess / totalFiles) * 100);
 
 console.log(`\n🎯 总体完成度: ${totalSuccess}/${totalFiles} (${completionRate}%)`);
 

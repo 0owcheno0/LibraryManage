@@ -22,7 +22,7 @@ export class DatabaseInitializer {
     // 连接数据库
     this.db = new Database(DB_PATH);
     this.db.pragma('journal_mode = WAL'); // 启用WAL模式提高性能
-    this.db.pragma('foreign_keys = ON');  // 启用外键约束
+    this.db.pragma('foreign_keys = ON'); // 启用外键约束
   }
 
   /**
@@ -33,25 +33,25 @@ export class DatabaseInitializer {
 
     // 1. 创建用户表
     this.createUsersTable();
-    
+
     // 2. 创建角色表
     this.createRolesTable();
-    
+
     // 3. 创建用户角色关联表
     this.createUserRolesTable();
-    
+
     // 4. 创建文档表
     this.createDocumentsTable();
-    
+
     // 5. 创建标签表
     this.createTagsTable();
-    
+
     // 6. 创建文档标签关联表
     this.createDocumentTagsTable();
-    
+
     // 7. 创建权限表
     this.createPermissionsTable();
-    
+
     // 8. 创建系统配置表
     this.createSystemConfigsTable();
 
@@ -76,14 +76,14 @@ export class DatabaseInitializer {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `;
-    
+
     this.db.exec(sql);
-    
+
     // 创建索引
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);');
-    
+
     console.log('✓ 用户表 (users) 创建完成');
   }
 
@@ -103,10 +103,10 @@ export class DatabaseInitializer {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `;
-    
+
     this.db.exec(sql);
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_roles_name ON roles(name);');
-    
+
     console.log('✓ 角色表 (roles) 创建完成');
   }
 
@@ -125,11 +125,11 @@ export class DatabaseInitializer {
         UNIQUE(user_id, role_id)
       );
     `;
-    
+
     this.db.exec(sql);
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_user_roles_role_id ON user_roles(role_id);');
-    
+
     console.log('✓ 用户角色关联表 (user_roles) 创建完成');
   }
 
@@ -158,9 +158,9 @@ export class DatabaseInitializer {
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
       );
     `;
-    
+
     this.db.exec(sql);
-    
+
     // 创建索引
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_documents_title ON documents(title);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_documents_created_by ON documents(created_by);');
@@ -168,7 +168,7 @@ export class DatabaseInitializer {
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_documents_is_public ON documents(is_public);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_documents_file_hash ON documents(file_hash);');
-    
+
     console.log('✓ 文档表 (documents) 创建完成');
   }
 
@@ -190,14 +190,14 @@ export class DatabaseInitializer {
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
       );
     `;
-    
+
     this.db.exec(sql);
-    
+
     // 创建索引
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_tags_created_by ON tags(created_by);');
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_tags_usage_count ON tags(usage_count DESC);');
-    
+
     console.log('✓ 标签表 (tags) 创建完成');
   }
 
@@ -216,13 +216,15 @@ export class DatabaseInitializer {
         UNIQUE(document_id, tag_id)
       );
     `;
-    
+
     this.db.exec(sql);
-    
+
     // 创建索引
-    this.db.exec('CREATE INDEX IF NOT EXISTS idx_document_tags_document_id ON document_tags(document_id);');
+    this.db.exec(
+      'CREATE INDEX IF NOT EXISTS idx_document_tags_document_id ON document_tags(document_id);'
+    );
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_document_tags_tag_id ON document_tags(tag_id);');
-    
+
     console.log('✓ 文档标签关联表 (document_tags) 创建完成');
   }
 
@@ -245,14 +247,18 @@ export class DatabaseInitializer {
         UNIQUE(document_id, user_id, permission)
       );
     `;
-    
+
     this.db.exec(sql);
-    
+
     // 创建索引
-    this.db.exec('CREATE INDEX IF NOT EXISTS idx_permissions_document_id ON permissions(document_id);');
+    this.db.exec(
+      'CREATE INDEX IF NOT EXISTS idx_permissions_document_id ON permissions(document_id);'
+    );
     this.db.exec('CREATE INDEX IF NOT EXISTS idx_permissions_user_id ON permissions(user_id);');
-    this.db.exec('CREATE INDEX IF NOT EXISTS idx_permissions_expires_at ON permissions(expires_at);');
-    
+    this.db.exec(
+      'CREATE INDEX IF NOT EXISTS idx_permissions_expires_at ON permissions(expires_at);'
+    );
+
     console.log('✓ 权限表 (permissions) 创建完成');
   }
 
@@ -272,10 +278,12 @@ export class DatabaseInitializer {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `;
-    
+
     this.db.exec(sql);
-    this.db.exec('CREATE INDEX IF NOT EXISTS idx_system_configs_key ON system_configs(config_key);');
-    
+    this.db.exec(
+      'CREATE INDEX IF NOT EXISTS idx_system_configs_key ON system_configs(config_key);'
+    );
+
     console.log('✓ 系统配置表 (system_configs) 创建完成');
   }
 
@@ -287,10 +295,10 @@ export class DatabaseInitializer {
 
     // 插入角色数据
     await this.seedRoles();
-    
+
     // 插入管理员用户
     await this.seedAdminUser();
-    
+
     // 插入系统配置
     await this.seedSystemConfigs();
 
@@ -307,29 +315,43 @@ export class DatabaseInitializer {
         display_name: '系统管理员',
         description: '拥有系统所有权限，可以管理用户、文档和系统配置',
         permissions: JSON.stringify([
-          'users.create', 'users.read', 'users.update', 'users.delete',
-          'documents.create', 'documents.read', 'documents.update', 'documents.delete',
-          'tags.create', 'tags.read', 'tags.update', 'tags.delete',
-          'system.config', 'system.monitor'
-        ])
+          'users.create',
+          'users.read',
+          'users.update',
+          'users.delete',
+          'documents.create',
+          'documents.read',
+          'documents.update',
+          'documents.delete',
+          'tags.create',
+          'tags.read',
+          'tags.update',
+          'tags.delete',
+          'system.config',
+          'system.monitor',
+        ]),
       },
       {
         name: 'editor',
         display_name: '编辑者',
         description: '可以创建、编辑、删除自己的文档，查看公开文档',
         permissions: JSON.stringify([
-          'documents.create', 'documents.read', 'documents.update', 'documents.delete.own',
-          'tags.create', 'tags.read', 'tags.update.own', 'tags.delete.own'
-        ])
+          'documents.create',
+          'documents.read',
+          'documents.update',
+          'documents.delete.own',
+          'tags.create',
+          'tags.read',
+          'tags.update.own',
+          'tags.delete.own',
+        ]),
       },
       {
         name: 'viewer',
         display_name: '查看者',
         description: '只能查看和下载公开文档',
-        permissions: JSON.stringify([
-          'documents.read.public', 'tags.read'
-        ])
-      }
+        permissions: JSON.stringify(['documents.read.public', 'tags.read']),
+      },
     ];
 
     const insertRole = this.db.prepare(`
@@ -361,7 +383,9 @@ export class DatabaseInitializer {
 
     if (result.changes > 0) {
       // 获取admin用户ID和admin角色ID
-      const adminUser = this.db.prepare('SELECT id FROM users WHERE username = ?').get('admin') as any;
+      const adminUser = this.db
+        .prepare('SELECT id FROM users WHERE username = ?')
+        .get('admin') as any;
       const adminRole = this.db.prepare('SELECT id FROM roles WHERE name = ?').get('admin') as any;
 
       // 分配admin角色
@@ -388,39 +412,51 @@ export class DatabaseInitializer {
         value: '团队知识库管理工具',
         description: '网站名称',
         type: 'string',
-        is_public: 1
+        is_public: 1,
       },
       {
         key: 'max_file_size',
         value: '104857600', // 100MB
         description: '文件上传最大大小（字节）',
         type: 'number',
-        is_public: 1
+        is_public: 1,
       },
       {
         key: 'allowed_file_types',
         value: JSON.stringify([
-          '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-          '.txt', '.md', '.jpg', '.jpeg', '.png', '.gif', '.zip'
+          '.pdf',
+          '.doc',
+          '.docx',
+          '.xls',
+          '.xlsx',
+          '.ppt',
+          '.pptx',
+          '.txt',
+          '.md',
+          '.jpg',
+          '.jpeg',
+          '.png',
+          '.gif',
+          '.zip',
         ]),
         description: '允许上传的文件类型',
         type: 'json',
-        is_public: 1
+        is_public: 1,
       },
       {
         key: 'jwt_expires_in',
         value: '24h',
         description: 'JWT令牌过期时间',
         type: 'string',
-        is_public: 0
+        is_public: 0,
       },
       {
         key: 'enable_user_registration',
         value: 'true',
         description: '是否允许用户注册',
         type: 'boolean',
-        is_public: 1
-      }
+        is_public: 1,
+      },
     ];
 
     const insertConfig = this.db.prepare(`
@@ -442,9 +478,7 @@ export class DatabaseInitializer {
     console.log('🔧 创建数据库触发器...');
 
     // 更新updated_at字段的触发器
-    const updateTriggers = [
-      'users', 'roles', 'documents', 'tags', 'system_configs'
-    ];
+    const updateTriggers = ['users', 'roles', 'documents', 'tags', 'system_configs'];
 
     for (const table of updateTriggers) {
       const triggerSQL = `
@@ -486,14 +520,24 @@ export class DatabaseInitializer {
     try {
       // 检查所有表是否存在
       const tables = [
-        'users', 'roles', 'user_roles', 'documents', 
-        'tags', 'document_tags', 'permissions', 'system_configs'
+        'users',
+        'roles',
+        'user_roles',
+        'documents',
+        'tags',
+        'document_tags',
+        'permissions',
+        'system_configs',
       ];
 
       for (const table of tables) {
-        const result = this.db.prepare(`
+        const result = this.db
+          .prepare(
+            `
           SELECT name FROM sqlite_master WHERE type='table' AND name=?
-        `).get(table);
+        `
+          )
+          .get(table);
 
         if (!result) {
           throw new Error(`表 ${table} 不存在`);
@@ -503,7 +547,7 @@ export class DatabaseInitializer {
       // 检查数据完整性
       const adminUser = this.db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
       const adminRole = this.db.prepare('SELECT * FROM roles WHERE name = ?').get('admin');
-      
+
       if (!adminUser || !adminRole) {
         throw new Error('初始数据不完整');
       }
@@ -533,7 +577,7 @@ export class DatabaseInitializer {
       roles: this.db.prepare('SELECT COUNT(*) as count FROM roles').get(),
       documents: this.db.prepare('SELECT COUNT(*) as count FROM documents').get(),
       tags: this.db.prepare('SELECT COUNT(*) as count FROM tags').get(),
-      database_size: fs.statSync(DB_PATH).size
+      database_size: fs.statSync(DB_PATH).size,
     };
 
     return stats;
@@ -544,12 +588,12 @@ export class DatabaseInitializer {
 if (require.main === module) {
   async function initDatabase() {
     const initializer = new DatabaseInitializer();
-    
+
     try {
       await initializer.createTables();
       initializer.createTriggers();
       await initializer.seedData();
-      
+
       const isValid = initializer.validateDatabase();
       if (isValid) {
         const stats = initializer.getStats();

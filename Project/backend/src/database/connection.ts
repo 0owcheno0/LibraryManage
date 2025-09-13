@@ -1,5 +1,4 @@
-// 开发模式：暂时跳过数据库连接，使用模拟数据
-// import Database from 'better-sqlite3';
+import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
@@ -9,7 +8,7 @@ import fs from 'fs';
  */
 export class DatabaseConnection {
   private static instance: DatabaseConnection;
-  private db: any;
+  private db!: Database.Database;
   private dbPath: string;
 
   private constructor() {
@@ -17,17 +16,72 @@ export class DatabaseConnection {
     this.dbPath =
       process.env.DB_PATH || path.join(__dirname, '../../../database/knowledge_base.db');
 
-    // 开发模式：跳过实际数据库连接
-    this.db = {
-      prepare: () => ({ get: () => null, all: () => [], run: () => null }),
-      pragma: () => null,
-      exec: () => null,
-      transaction: (fn: any) => () => fn(this.db),
-      backup: () => ({ complete: () => null }),
-      close: () => null,
-    };
+    this.initializeDatabase();
+  }
 
-    console.log(`🗄️ 数据库连接（开发模式）: ${this.dbPath}`);
+  /**
+   * 初始化数据库连接
+   */
+  private initializeDatabase(): void {
+    try {
+      // 确保数据库目录存在
+      const dbDir = path.dirname(this.dbPath);
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+      }
+
+      // 连接数据库
+      this.db = new Database(this.dbPath);
+      
+      // 配置数据库
+      this.configureDatabase();
+      
+      console.log(`✅ 数据库连接成功: ${this.dbPath}`);
+      
+      // 如果数据库为空，初始化表结构
+      this.ensureTablesExist();
+      
+    } catch (error) {
+      console.error('❌ 数据库连接失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 确保数据库表存在
+   */
+  private ensureTablesExist(): void {
+    try {
+      // 检查是否存在用户表
+      const tableExists = this.db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
+      ).get();
+      
+      if (!tableExists) {
+        console.log('🔧 数据库表不存在，正在初始化...');
+        this.initializeTables();
+      }
+    } catch (error) {
+      console.error('❌ 检查数据库表失败:', error);
+    }
+  }
+
+  /**
+   * 初始化数据库表
+   */
+  private initializeTables(): void {
+    try {
+      const schemaPath = path.join(__dirname, 'schema.sql');
+      if (fs.existsSync(schemaPath)) {
+        const schema = fs.readFileSync(schemaPath, 'utf-8');
+        this.db.exec(schema);
+        console.log('✅ 数据库表初始化完成');
+      } else {
+        console.warn('⚠️ 数据库模式文件不存在，跳过初始化');
+      }
+    } catch (error) {
+      console.error('❌ 数据库表初始化失败:', error);
+    }
   }
 
   /**
@@ -43,45 +97,92 @@ export class DatabaseConnection {
   /**
    * 获取数据库对象
    */
-  public getDatabase(): any {
+  public getDatabase(): Database.Database {
     return this.db;
   }
 
   /**
-   * 配置数据库（开发模式空实现）
+   * 配置数据库
    */
   private configureDatabase(): void {
-    // 开发模式：跳过数据库配置
-    console.log('🚀 数据库配置跳过（开发模式）');
+    // 启用WAL模式提高性能
+    this.db.pragma('journal_mode = WAL');
+    
+    // 启用外键约束
+    this.db.pragma('foreign_keys = ON');
+    
+    // 设置同步模式
+    this.db.pragma('synchronous = NORMAL');
+    
+    console.log('🚀 数据库配置完成');
   }
 
   /**
-   * 检查数据库连接状态（开发模式）
+   * 检查数据库连接状态
    */
   public isConnected(): boolean {
-    return true; // 开发模式始终返回true
+    try {
+      // 尝试执行一个简单的查询
+      this.db.prepare('SELECT 1').get();
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
-   * 执行数据库健康检查（开发模式）
+   * 执行数据库健康检查
    */
   public healthCheck(): { status: string; message: string; details?: any } {
-    return {
-      status: 'healthy',
-      message: '开发模式 - 数据库连接跳过',
-      details: {
-        mode: 'development',
-        mock_data: true,
-        timestamp: new Date().toISOString(),
-      },
-    };
+    try {
+      const isConnected = this.isConnected();
+      
+      if (!isConnected) {
+        return {
+          status: 'unhealthy',
+          message: '数据库连接失败',
+          details: {
+            path: this.dbPath,
+            timestamp: new Date().toISOString(),
+          },
+        };
+      }
+      
+      // 获取数据库统计信息
+      const stats = {
+        users: this.db.prepare('SELECT COUNT(*) as count FROM users').get(),
+        documents: this.db.prepare('SELECT COUNT(*) as count FROM documents').get(),
+        tags: this.db.prepare('SELECT COUNT(*) as count FROM tags').get(),
+      };
+      
+      return {
+        status: 'healthy',
+        message: '数据库连接正常',
+        details: {
+          path: this.dbPath,
+          statistics: stats,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        message: `数据库健康检查失败: ${error}`,
+        details: {
+          path: this.dbPath,
+          error: error,
+          timestamp: new Date().toISOString(),
+        },
+      };
+    }
   }
 
   /**
-   * 执行事务（开发模式）
+   * 执行事务
    */
-  public transaction<T>(fn: (db: any) => T): T {
-    return fn(this.db);
+  public transaction<T>(fn: (db: Database.Database) => T): T {
+    const transaction = this.db.transaction(fn);
+    return transaction(this.db);
   }
 
   /**
@@ -90,8 +191,8 @@ export class DatabaseConnection {
   public async backup(backupPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const backup = this.db.backup(backupPath);
-        backup.complete();
+        // 使用SQLite的BACKUP命令
+        this.db.exec(`VACUUM INTO '${backupPath}'`);
         resolve();
       } catch (error) {
         reject(error);
@@ -124,9 +225,9 @@ export class DatabaseConnection {
 }
 
 /**
- * 获取数据库实例的便捷函数（开发模式）
+ * 获取数据库实例的便捷函数
  */
-export function getDatabase(): any {
+export function getDatabase(): Database.Database {
   return DatabaseConnection.getInstance().getDatabase();
 }
 

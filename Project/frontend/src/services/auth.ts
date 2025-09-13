@@ -3,10 +3,12 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   username: string;
-  createdAt: string;
+  full_name: string;
+  avatar_url?: string;
+  created_at: string;
 }
 
 export interface LoginCredentials {
@@ -65,7 +67,11 @@ class AuthService {
     this.api.interceptors.response.use(
       response => response,
       async error => {
-        if (error.response?.status === 401) {
+        // 如果是登录或注册请求失败，直接抛出错误，不进行重定向
+        const isAuthRequest = error.config?.url?.includes('/auth/login') || 
+                             error.config?.url?.includes('/auth/register');
+        
+        if (error.response?.status === 401 && !isAuthRequest) {
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
             try {
@@ -77,11 +83,19 @@ class AuthService {
               return this.api.request(error.config);
             } catch (refreshError) {
               this.clearTokens();
-              window.location.href = '/login';
+              // 使用编程式导航而不是window.location
+              if (window.location.pathname !== '/login') {
+                window.history.pushState({}, '', '/login');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
             }
           } else {
             this.clearTokens();
-            window.location.href = '/login';
+            // 使用编程式导航而不是window.location
+            if (window.location.pathname !== '/login') {
+              window.history.pushState({}, '', '/login');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }
           }
         }
         return Promise.reject(error);

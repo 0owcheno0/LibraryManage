@@ -23,7 +23,14 @@ export default function RegisterPage() {
     const { confirmPassword, ...registerData } = values;
     const success = await register(registerData);
     if (success) {
+      // 注册成功，跳转到仪表板
       navigate('/dashboard');
+    } else {
+      // 注册失败，清空密码相关字段
+      form.setFieldsValue({ 
+        password: '', 
+        confirmPassword: '' 
+      });
     }
   };
 

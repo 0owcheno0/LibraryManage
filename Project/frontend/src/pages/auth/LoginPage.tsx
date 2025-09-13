@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Card, Form, Input, Button, Typography, Divider, Layout } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -17,6 +17,7 @@ export default function LoginPage() {
   const { login, state } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const passwordInputRef = useRef<any>(null);
 
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
@@ -25,8 +26,16 @@ export default function LoginPage() {
       email: values.email,
       password: values.password,
     });
+    
     if (success) {
+      // 登录成功，跳转到目标页面
       navigate(from, { replace: true });
+    } else {
+      // 登录失败，清空密码字段并让用户重新输入
+      form.setFieldsValue({ password: '' });
+      setTimeout(() => {
+        passwordInputRef.current?.focus();
+      }, 100);
     }
   };
 
@@ -77,7 +86,11 @@ export default function LoginPage() {
                 { min: 6, message: '密码至少6位' },
               ]}
             >
-              <Input.Password prefix={<LockOutlined />} placeholder="密码" />
+              <Input.Password 
+                ref={passwordInputRef}
+                prefix={<LockOutlined />} 
+                placeholder="密码" 
+              />
             </Form.Item>
 
             <Form.Item>

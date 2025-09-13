@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 config();
 
 export interface TokenPayload {
-  userId: string;
+  userId: string | number;
   email: string;
   type: 'access' | 'refresh';
 }

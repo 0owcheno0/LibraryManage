@@ -1,9 +1,19 @@
 import { app, PORT } from './app';
+import { getDatabaseConnection } from './database/connection';
 
 async function startServer() {
   try {
-    // 暂时跳过数据库连接，使用模拟数据
-    console.log('✅ 数据库连接跳过（开发模式）');
+    // 初始化数据库连接
+    console.log('🗄️ 正在初始化数据库连接...');
+    const dbConnection = getDatabaseConnection();
+    
+    // 执行数据库健康检查
+    const healthCheck = dbConnection.healthCheck();
+    console.log(`✅ 数据库状态: ${healthCheck.message}`);
+    
+    if (healthCheck.details?.statistics) {
+      console.log('📊 数据库统计:', healthCheck.details.statistics);
+    }
 
     // 启动服务器
     app.listen(PORT, () => {
@@ -12,7 +22,7 @@ async function startServer() {
 📡 端口: ${PORT}
 🌍 环境: ${process.env.NODE_ENV || 'development'}
 📋 API文档: http://localhost:${PORT}/api/v1/health
-🗃️ 数据库: 开发模式（使用模拟数据）
+🗃️ 数据库: SQLite (${dbConnection.isConnected() ? '已连接' : '连接失败'})
 ⏰ 启动时间: ${new Date().toLocaleString()}
       `);
     });

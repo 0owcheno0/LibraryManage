@@ -1,10 +1,13 @@
 import React from 'react';
 import { Card, Typography, Button, Space, Tag } from 'antd';
 import { PlusOutlined, TagsOutlined } from '@ant-design/icons';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const { Title, Paragraph } = Typography;
 
 export default function TagManagementPage() {
+  const colors = useThemeColors();
+  
   const mockTags = [
     { name: '技术文档', color: '#1890ff' },
     { name: '产品文档', color: '#52c41a' },
@@ -56,7 +59,7 @@ export default function TagManagementPage() {
           ))}
         </Space>
 
-        <div style={{ marginTop: 32, textAlign: 'center', color: '#999' }}>
+        <div style={{ marginTop: 32, textAlign: 'center', color: colors.textSecondary }}>
           <TagsOutlined style={{ fontSize: 48, marginBottom: 16 }} />
           <div>标签管理功能开发中</div>
           <div>包括创建、编辑、删除标签，以及标签使用统计</div>

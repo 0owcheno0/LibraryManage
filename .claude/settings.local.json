@@ -9,7 +9,9 @@
       "Bash(node:*)",
       "Bash(npm:*)",
       "Bash(curl:*)",
-      "Bash(./start.sh:*)"
+      "Bash(./start.sh:*)",
+      "Bash(pkill:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

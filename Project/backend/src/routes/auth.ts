@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { UserModel, CreateUserData, LoginCredentials } from '../models/User';
+import { RoleModel } from '../models/Role';
 import { jwtUtils } from '../utils/jwt';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth';
 import { registerSchema, loginSchema, refreshTokenSchema } from '../validators/auth';
@@ -47,16 +48,19 @@ router.post('/register', async (req: Request, res: Response) => {
       password: hashedPassword,
     });
 
+    // 获取用户角色信息
+    const role = await RoleModel.findById(user.role_id);
     const tokens = jwtUtils.generateTokens({
       userId: user.id,
       email: user.email,
+      role: role?.name || 'viewer',
     });
 
     res.status(201).json({
       code: 201,
       message: '注册成功',
       data: {
-        user: UserModel.toProfile(user),
+        user: await UserModel.toProfileWithRole(user),
         ...tokens,
       },
       timestamp: new Date().toISOString(),
@@ -106,16 +110,19 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
+    // 获取用户角色信息
+    const role = await RoleModel.findById(user.role_id);
     const tokens = jwtUtils.generateTokens({
       userId: user.id,
       email: user.email,
+      role: role?.name || 'viewer',
     });
 
     res.status(200).json({
       code: 200,
       message: '登录成功',
       data: {
-        user: UserModel.toProfile(user),
+        user: await UserModel.toProfileWithRole(user),
         ...tokens,
       },
       timestamp: new Date().toISOString(),
@@ -196,7 +203,7 @@ router.get('/me', authenticate, async (req: AuthenticatedRequest, res: Response)
     res.status(200).json({
       code: 200,
       message: '获取用户信息成功',
-      data: UserModel.toProfile(user),
+      data: await UserModel.toProfileWithRole(user),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

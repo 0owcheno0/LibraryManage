@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { message } from 'antd';
+import { App } from 'antd';
 import { authService, User, LoginCredentials, RegisterData } from '../services/auth';
 
 interface AuthState {
@@ -36,54 +36,62 @@ const initialState: AuthState = {
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
-    case 'AUTH_START':
-      return {
-        ...state,
-        isLoading: true,
-      };
-    case 'AUTH_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        isAuthenticated: true,
-        user: action.payload.user,
-        token: action.payload.token,
-      };
-    case 'AUTH_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-      };
-    case 'LOGOUT':
-      return {
-        ...state,
-        isAuthenticated: false,
-        user: null,
-        token: null,
-      };
-    case 'UPDATE_USER':
-      return {
-        ...state,
-        user: action.payload,
-      };
-    default:
-      return state;
+  case 'AUTH_START':
+    return {
+      ...state,
+      isLoading: true,
+    };
+  case 'AUTH_SUCCESS':
+    return {
+      ...state,
+      isLoading: false,
+      isAuthenticated: true,
+      user: action.payload.user,
+      token: action.payload.token,
+    };
+  case 'AUTH_FAILURE':
+    return {
+      ...state,
+      isLoading: false,
+      isAuthenticated: false,
+      user: null,
+      token: null,
+    };
+  case 'LOGOUT':
+    return {
+      ...state,
+      isAuthenticated: false,
+      user: null,
+      token: null,
+    };
+  case 'UPDATE_USER':
+    return {
+      ...state,
+      user: action.payload,
+    };
+  default:
+    return state;
   }
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const { message } = App.useApp();
 
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('accessToken');
       const storedUser = authService.getStoredUser();
 
-      if (token && storedUser) {
+      // 如果没有token，直接结束初始化
+      if (!token) {
+        dispatch({ type: 'AUTH_FAILURE' });
+        return;
+      }
+
+      if (storedUser) {
         try {
+          // 如果有存储的用户信息，尝试验证token
           const user = await authService.getUserInfo();
           dispatch({
             type: 'AUTH_SUCCESS',
@@ -91,10 +99,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         } catch (error) {
           console.error('Token validation failed:', error);
+          // Token无效，清除存储的信息
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
           dispatch({ type: 'AUTH_FAILURE' });
         }
-      } else if (token) {
+      } else {
         try {
+          // 没有存储的用户信息，但有token，尝试获取用户信息
           const user = await authService.getUserInfo();
           localStorage.setItem('user', JSON.stringify(user));
           dispatch({
@@ -103,6 +116,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
         } catch (error) {
           console.error('Get user info failed:', error);
+          // Token无效，清除存储的token
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           dispatch({ type: 'AUTH_FAILURE' });
         }
       }

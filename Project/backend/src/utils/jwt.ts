@@ -7,6 +7,7 @@ export interface TokenPayload {
   userId: string | number;
   email: string;
   type: 'access' | 'refresh';
+  role?: string;
 }
 
 export interface UserTokens {

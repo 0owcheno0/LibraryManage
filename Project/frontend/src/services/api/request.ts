@@ -46,7 +46,7 @@ class RequestService {
       },
       error => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // 响应拦截器
@@ -67,24 +67,24 @@ class RequestService {
           const { status, data } = error.response;
 
           switch (status) {
-            case 401:
-              // 未授权，清除token并跳转到登录页
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              window.location.href = '/login';
-              message.error('登录已过期，请重新登录');
-              break;
-            case 403:
-              message.error('没有权限访问此资源');
-              break;
-            case 404:
-              message.error('请求的资源不存在');
-              break;
-            case 500:
-              message.error('服务器内部错误');
-              break;
-            default:
-              message.error(data?.message || '请求失败');
+          case 401:
+            // 未授权，清除token并跳转到登录页
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+            message.error('登录已过期，请重新登录');
+            break;
+          case 403:
+            message.error('没有权限访问此资源');
+            break;
+          case 404:
+            message.error('请求的资源不存在');
+            break;
+          case 500:
+            message.error('服务器内部错误');
+            break;
+          default:
+            message.error(data?.message || '请求失败');
           }
         } else if (error.request) {
           // 网络错误
@@ -95,7 +95,7 @@ class RequestService {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -123,7 +123,7 @@ class RequestService {
   public upload<T>(
     url: string,
     formData: FormData,
-    onProgress?: (percent: number) => void
+    onProgress?: (percent: number) => void,
   ): Promise<ApiResponse<T>> {
     return this.instance
       .post(url, formData, {

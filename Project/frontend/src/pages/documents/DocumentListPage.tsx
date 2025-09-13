@@ -22,6 +22,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -42,6 +43,7 @@ interface Document {
 export default function DocumentListPage() {
   const [uploadVisible, setUploadVisible] = useState(false);
   const [form] = Form.useForm();
+  const colors = useThemeColors();
 
   // 模拟数据
   const documents: Document[] = [];

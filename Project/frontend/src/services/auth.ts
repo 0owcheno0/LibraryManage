@@ -9,6 +9,7 @@ export interface User {
   full_name: string;
   avatar_url?: string;
   created_at: string;
+  role?: string; // 添加角色字段
 }
 
 export interface LoginCredentials {
@@ -68,9 +69,9 @@ class AuthService {
       response => response,
       async error => {
         // 如果是登录或注册请求失败，直接抛出错误，不进行重定向
-        const isAuthRequest = error.config?.url?.includes('/auth/login') || 
+        const isAuthRequest = error.config?.url?.includes('/auth/login') ||
                              error.config?.url?.includes('/auth/register');
-        
+
         if (error.response?.status === 401 && !isAuthRequest) {
           const refreshToken = localStorage.getItem('refreshToken');
           if (refreshToken) {
@@ -99,7 +100,7 @@ class AuthService {
           }
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 

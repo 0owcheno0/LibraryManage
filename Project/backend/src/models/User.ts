@@ -1,5 +1,6 @@
 import { getDatabase } from '../database/connection';
 import type Database from 'better-sqlite3';
+import { RoleModel } from './Role';
 
 export interface User {
   id: number;
@@ -34,6 +35,7 @@ export interface UserProfile {
   full_name: string;
   avatar_url?: string | undefined;
   created_at: string;
+  role?: string; // 添加角色名称字段
 }
 
 export class UserModel {
@@ -137,6 +139,22 @@ export class UserModel {
       full_name: user.full_name,
       avatar_url: user.avatar_url || undefined,
       created_at: user.created_at,
+    };
+  }
+
+  /**
+   * 获取包含角色信息的用户资料
+   */
+  static async toProfileWithRole(user: User): Promise<UserProfile> {
+    const role = await RoleModel.findById(user.role_id);
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      full_name: user.full_name,
+      avatar_url: user.avatar_url || undefined,
+      created_at: user.created_at,
+      role: role?.name || 'viewer', // 默认为 viewer 角色
     };
   }
 }

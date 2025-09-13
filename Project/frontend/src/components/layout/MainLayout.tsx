@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, theme } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, theme, Space } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -12,6 +12,8 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeSwitcher } from '../ThemeSwitcher';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -19,6 +21,7 @@ const { Title } = Typography;
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const { state, logout } = useAuth();
+  const { colors } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = theme.useToken();
@@ -57,7 +60,7 @@ export default function MainLayout() {
       key: 'settings',
       icon: <SettingOutlined />,
       label: '设置',
-      onClick: () => console.log('设置'),
+      onClick: () => navigate('/settings'),
     },
     {
       type: 'divider' as const,
@@ -135,12 +138,18 @@ export default function MainLayout() {
           />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span>欢迎，{state.user?.fullName || '用户'}</span>
+            {/* 主题切换器 */}
+            <ThemeSwitcher type="button" size="middle" />
+            
+            <span style={{ color: colors.textSecondary }}>
+              欢迎，{state.user?.full_name || '用户'}
+            </span>
+            
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
               <Avatar
                 size="default"
                 icon={<UserOutlined />}
-                src={state.user?.avatarUrl}
+                src={state.user?.avatar_url}
                 style={{ cursor: 'pointer' }}
               />
             </Dropdown>

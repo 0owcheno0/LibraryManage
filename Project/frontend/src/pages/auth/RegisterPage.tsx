@@ -27,9 +27,9 @@ export default function RegisterPage() {
       navigate('/dashboard');
     } else {
       // 注册失败，清空密码相关字段
-      form.setFieldsValue({ 
-        password: '', 
-        confirmPassword: '' 
+      form.setFieldsValue({
+        password: '',
+        confirmPassword: '',
       });
     }
   };

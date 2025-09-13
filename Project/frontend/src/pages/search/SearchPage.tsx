@@ -1,11 +1,13 @@
 import React from 'react';
 import { Card, Input, Typography, Button, Space, Tag, Row, Col } from 'antd';
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const { Title, Paragraph } = Typography;
 const { Search } = Input;
 
 export default function SearchPage() {
+  const colors = useThemeColors();
   const popularTags = ['技术文档', '产品文档', 'API文档', '用户手册'];
 
   return (
@@ -44,7 +46,7 @@ export default function SearchPage() {
       <Row gutter={16}>
         <Col span={6}>
           <Card title="筛选条件" extra={<FilterOutlined />}>
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+            <div style={{ textAlign: 'center', padding: '40px 0', color: colors.textSecondary }}>
               高级筛选功能
               <br />
               开发中...
@@ -54,7 +56,7 @@ export default function SearchPage() {
 
         <Col span={18}>
           <Card title="搜索结果">
-            <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+            <div style={{ textAlign: 'center', padding: '60px 0', color: colors.textSecondary }}>
               <SearchOutlined style={{ fontSize: 48, marginBottom: 16 }} />
               <div style={{ fontSize: 16 }}>请输入关键词开始搜索</div>
               <Paragraph type="secondary">支持按文档标题、标签和文件类型搜索</Paragraph>

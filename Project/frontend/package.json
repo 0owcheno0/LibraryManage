@@ -1,0 +1,57 @@
+{
+  "name": "knowledge-base-frontend",
+  "version": "1.0.0",
+  "description": "团队知识库管理工具前端应用",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write src/**/*.{ts,tsx,css,md}"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
+    "antd": "^5.9.0",
+    "axios": "^1.5.0",
+    "@ant-design/icons": "^5.2.6",
+    "dayjs": "^1.11.9",
+    "classnames": "^2.3.2",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.22",
+    "@types/react-dom": "^18.2.7",
+    "@types/lodash-es": "^4.17.9",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "@vitejs/plugin-react": "^4.0.4",
+    "eslint": "^8.48.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vitest": "^0.34.6",
+    "@vitest/ui": "^0.34.6",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/jest-dom": "^6.1.3",
+    "@testing-library/user-event": "^14.4.3",
+    "jsdom": "^22.1.0",
+    "prettier": "^3.0.3"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "vite",
+    "antd",
+    "knowledge-base"
+  ],
+  "author": "团队知识库项目组",
+  "license": "MIT"
+}

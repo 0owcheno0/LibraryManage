@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal, Typography, Space } from 'antd';
 import {
   ExclamationCircleOutlined,
@@ -191,7 +190,7 @@ export class ConfirmDialog {
     onConfirm: () => Promise<void> | void;
     onCancel?: () => void;
   }) {
-    const { documentTitle, fromPublic, toPublic, onConfirm, onCancel } = options;
+    const { documentTitle, toPublic, onConfirm, onCancel } = options;
     
     const action = toPublic ? '公开' : '私有';
     const description = toPublic 

@@ -1,6 +1,5 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+import { createAuthenticatedAxios, createPureAxios } from './api/config';
+import { API_CONFIG } from './api/config';
 
 export interface User {
   id: number;
@@ -45,64 +44,8 @@ export interface RefreshResponse {
 }
 
 class AuthService {
-  private readonly api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  constructor() {
-    this.setupInterceptors();
-  }
-
-  private setupInterceptors() {
-    this.api.interceptors.request.use(config => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
-
-    this.api.interceptors.response.use(
-      response => response,
-      async error => {
-        // 如果是登录或注册请求失败，直接抛出错误，不进行重定向
-        const isAuthRequest = error.config?.url?.includes('/auth/login') ||
-                             error.config?.url?.includes('/auth/register');
-
-        if (error.response?.status === 401 && !isAuthRequest) {
-          const refreshToken = localStorage.getItem('refreshToken');
-          if (refreshToken) {
-            try {
-              const refreshResponse = await this.refreshToken(refreshToken);
-              localStorage.setItem('accessToken', refreshResponse.data.accessToken);
-              localStorage.setItem('refreshToken', refreshResponse.data.refreshToken);
-
-              error.config.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
-              return this.api.request(error.config);
-            } catch (refreshError) {
-              this.clearTokens();
-              // 使用编程式导航而不是window.location
-              if (window.location.pathname !== '/login') {
-                window.history.pushState({}, '', '/login');
-                window.dispatchEvent(new PopStateEvent('popstate'));
-              }
-            }
-          } else {
-            this.clearTokens();
-            // 使用编程式导航而不是window.location
-            if (window.location.pathname !== '/login') {
-              window.history.pushState({}, '', '/login');
-              window.dispatchEvent(new PopStateEvent('popstate'));
-            }
-          }
-        }
-        return Promise.reject(error);
-      },
-    );
-  }
+  // 使用纯净的axios实例，因为认证相关请求不需要认证头
+  private readonly api = createPureAxios();
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await this.api.post<AuthResponse>('/auth/login', credentials);
@@ -121,9 +64,12 @@ class AuthService {
     return response.data;
   }
 
+  // 使用带认证的axios实例
+  private readonly authenticatedApi = createAuthenticatedAxios();
+
   async logout(): Promise<void> {
     try {
-      await this.api.post('/auth/logout');
+      await this.authenticatedApi.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -132,22 +78,22 @@ class AuthService {
   }
 
   async getUserInfo(): Promise<User> {
-    const response = await this.api.get<{ data: User }>('/auth/me');
+    const response = await this.authenticatedApi.get<{ data: User }>('/auth/me');
     return response.data.data;
   }
 
   private clearTokens(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem(API_CONFIG.TOKEN_KEY);
+    localStorage.removeItem(API_CONFIG.REFRESH_TOKEN_KEY);
+    localStorage.removeItem(API_CONFIG.USER_KEY);
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('accessToken');
+    return !!localStorage.getItem(API_CONFIG.TOKEN_KEY);
   }
 
   getStoredUser(): User | null {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem(API_CONFIG.USER_KEY);
     return userStr ? JSON.parse(userStr) : null;
   }
 }

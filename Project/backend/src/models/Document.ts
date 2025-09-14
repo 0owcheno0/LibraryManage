@@ -16,7 +16,7 @@ export interface Document {
   is_public: number; // 0: 私有, 1: 公开
   view_count: number;
   download_count: number;
-  upload_user_id: number;
+  created_by: number;
   created_at: string;
   updated_at: string;
 }
@@ -33,7 +33,7 @@ export interface CreateDocumentData {
   friendly_type: string;
   formatted_size: string;
   is_public?: number;
-  upload_user_id: number;
+  created_by: number;
   tag_ids?: number[];
 }
 
@@ -77,7 +77,7 @@ export class DocumentModel {
           INSERT INTO documents (
             title, description, file_name, file_path, file_size, mime_type, 
             file_hash, file_extension, friendly_type, formatted_size,
-            is_public, upload_user_id, created_at, updated_at
+            is_public, created_by, created_at, updated_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
         `);
         
@@ -93,7 +93,7 @@ export class DocumentModel {
           data.friendly_type,
           data.formatted_size,
           data.is_public || 0,
-          data.upload_user_id
+          data.created_by
         );
 
         const documentId = result.lastInsertRowid as number;
@@ -173,7 +173,7 @@ export class DocumentModel {
       }
 
       // 私有文档只有创建者可以访问
-      if (userId && document.upload_user_id === userId) {
+      if (userId && document.created_by === userId) {
         return { hasAccess: true, document };
       }
 

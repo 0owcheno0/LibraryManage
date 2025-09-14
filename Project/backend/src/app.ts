@@ -16,6 +16,8 @@ import documentRoutes from './routes/documents';
 import tagRoutes from './routes/tags';
 import userRoutes from './routes/users';
 import searchRoutes from './routes/search';
+import permissionRoutes from './routes/permissions';
+import sharedRoutes from './routes/shared';
 
 // 加载环境变量
 dotenv.config();
@@ -43,6 +45,8 @@ app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/tags', tagRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/search', searchRoutes);
+app.use('/api/v1/documents', permissionRoutes);
+app.use('/api/v1/shared', sharedRoutes);
 
 // 健康检查
 app.get('/api/v1/health', (req, res) => {

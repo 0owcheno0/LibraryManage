@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { useThemeColors } from '../contexts/ThemeContext';
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 /**
  * 自定义加载图标

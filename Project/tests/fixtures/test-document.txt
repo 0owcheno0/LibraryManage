@@ -1,0 +1,29 @@
+这是一个用于端到端测试的示例文档。
+
+标题：测试文档E2E
+作者：测试用户
+创建时间：2025-09-14
+
+内容概述：
+本文档用于验证文档上传、搜索、下载等功能是否正常工作。
+
+主要特性：
+1. 文件上传测试
+2. 全文搜索测试  
+3. 标签功能测试
+4. 权限管理测试
+5. 分享功能测试
+
+测试关键词：
+- 端到端测试 (E2E Testing)
+- 自动化测试 (Automation Testing)
+- 功能验证 (Function Verification)
+- 质量保证 (Quality Assurance)
+
+技术栈：
+- 前端：React + TypeScript + Ant Design
+- 后端：Node.js + Express + SQLite
+- 测试：Playwright + Jest
+
+结论：
+如果您看到这个文档，说明文档管理功能运行正常。

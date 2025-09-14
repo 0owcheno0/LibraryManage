@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import React, { useState, useEffect } from 'react';
 import {
   Table,
   Button,
@@ -20,11 +19,11 @@ import {
   FileOutlined,
   UploadOutlined,
   SearchOutlined,
-  DownloadOutlined,
-  EyeOutlined,
   FilterOutlined,
+  EyeOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 import DocumentUpload from '../../components/DocumentUpload';
 import DocumentActions from '../../components/DocumentActions';
@@ -145,6 +144,28 @@ const DocumentList: React.FC = () => {
       key: 'formatted_size',
       width: 80,
       sorter: true,
+    },
+    {
+      title: '标签',
+      key: 'tags',
+      width: 200,
+      render: (_, record) => (
+        <Space wrap size={[4, 4]}>
+          {record.tags && record.tags.length > 0 ? (
+            record.tags.map((tag: any) => (
+              <Tag 
+                key={tag.id} 
+                color={tag.color || 'blue'}
+                style={{ margin: 0 }}
+              >
+                {tag.name}
+              </Tag>
+            ))
+          ) : (
+            <span style={{ color: '#ccc', fontStyle: 'italic' }}>无标签</span>
+          )}
+        </Space>
+      ),
     },
     {
       title: '创建者',

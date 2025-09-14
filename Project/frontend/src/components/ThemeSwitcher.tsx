@@ -36,7 +36,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           </span>
         )}
         <Switch
-          size={size === 'middle' ? 'default' : size}
+          size={size === 'middle' ? undefined : (size === 'large' ? 'default' : size)}
           checked={isDark}
           onChange={toggle}
           checkedChildren={<MoonOutlined />}

@@ -1,31 +1,13 @@
 import React from 'react';
-import { 
-  Card, 
-  Typography, 
-  Space, 
-  Divider, 
-  Row, 
-  Col,
-  Alert,
-  Switch,
-  Button,
-  message,
-} from 'antd';
-import {
-  SettingOutlined,
-  BgColorsOutlined,
-  InfoCircleOutlined,
-} from '@ant-design/icons';
+import { Card, Typography, Button, Space, Row, Col, Alert, Divider, Switch, message } from 'antd';
+import { SettingOutlined, BgColorsOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { ThemeSwitcher, LabeledThemeSelector } from '../../components/ThemeSwitcher';
 
 const { Title, Text, Paragraph } = Typography;
 
-/**
- * 设置页面
- */
 export default function SettingsPage() {
-  const { theme, colors, isDark, toggleTheme, setTheme } = useTheme();
+  const { theme, colors, isDark, setTheme } = useTheme();
 
   const handleThemeReset = () => {
     setTheme('light');

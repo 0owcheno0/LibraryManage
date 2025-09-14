@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { createAuthenticatedAxios } from './api/config';
 import {
   Document,
   DocumentListResponse,
@@ -9,40 +9,8 @@ import {
   ApiResponse,
 } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000/api/v1';
-
 class DocumentService {
-  private readonly api = axios.create({
-    baseURL: API_BASE_URL,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  constructor() {
-    this.setupInterceptors();
-  }
-
-  private setupInterceptors() {
-    this.api.interceptors.request.use(config => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
-
-    this.api.interceptors.response.use(
-      response => response,
-      error => {
-        if (error.response?.status === 401) {
-          // 重定向到登录页面
-          window.location.href = '/login';
-        }
-        return Promise.reject(error);
-      },
-    );
-  }
+  private readonly api = createAuthenticatedAxios();
 
   // 获取文档列表
   async getDocuments(params: DocumentListParams = {}): Promise<DocumentListResponse> {
@@ -76,11 +44,13 @@ class DocumentService {
       formData.append('description', data.description);
     }
 
-    formData.append('isPublic', data.isPublic.toString());
+    // 修复参数名：使用后端期望的 is_public 而不是 isPublic
+    formData.append('is_public', data.isPublic ? '1' : '0');
 
+    // 修复参数名：使用后端期望的 tag_ids 而不是 tags
     if (data.tags && data.tags.length > 0) {
       data.tags.forEach(tag => {
-        formData.append('tags[]', tag);
+        formData.append('tag_ids[]', tag.toString());
       });
     }
 
@@ -113,12 +83,14 @@ class DocumentService {
 
   // 获取文档预览URL
   getPreviewUrl(id: number): string {
-    return `${API_BASE_URL}/documents/${id}/preview`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    return `${baseUrl}/documents/${id}/preview`;
   }
 
   // 获取文档下载URL
   getDownloadUrl(id: number): string {
-    return `${API_BASE_URL}/documents/${id}/download`;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+    return `${baseUrl}/documents/${id}/download`;
   }
 
   // 增加浏览次数

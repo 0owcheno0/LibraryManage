@@ -59,14 +59,14 @@ export interface DocumentCreateRequest {
   title: string;
   description?: string;
   file: File;
-  tags?: string[];
+  tags?: number[]; // Changed from string[] to number[] for tag IDs
   isPublic: boolean;
 }
 
 export interface DocumentUpdateRequest {
   title?: string;
   description?: string;
-  tags?: string[];
+  tags?: number[]; // Changed from string[] to number[] for tag IDs
   isPublic?: boolean;
 }
 

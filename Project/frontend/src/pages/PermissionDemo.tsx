@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Space, Tag, Alert, Button, Descriptions } from 'antd';
+import { Card, Space, Tag, Alert, Descriptions } from 'antd';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermission } from '../hooks/usePermission';
 import type { Document } from '../types';
@@ -19,10 +19,12 @@ const exampleDocument: Document = {
   is_public: 0, // 私有文档
   upload_user_id: 1,
   creator_name: '张三',
+  creator_username: 'zhangsan',
   view_count: 10,
   download_count: 5,
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
+  tag_count: 0
 };
 
 /**
@@ -190,3 +192,5 @@ const PermissionDemo: React.FC = () => {
 };
 
 export default PermissionDemo;
+
+

@@ -70,7 +70,8 @@ export class DatabaseInitializer {
         password_hash VARCHAR(255) NOT NULL,
         full_name VARCHAR(100) NOT NULL,
         avatar_url VARCHAR(500),
-        is_active BOOLEAN DEFAULT 1,
+        role_id INTEGER DEFAULT 3,
+        status INTEGER DEFAULT 1,
         last_login_at DATETIME,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -235,29 +236,22 @@ export class DatabaseInitializer {
     const sql = `
       CREATE TABLE IF NOT EXISTS permissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        document_id INTEGER NOT NULL,
+        resource_type VARCHAR(50) NOT NULL,  -- 'document', 'tag', 'user'
+        resource_id INTEGER,
         user_id INTEGER NOT NULL,
-        permission VARCHAR(20) NOT NULL, -- read, write, admin
-        granted_by INTEGER NOT NULL, -- 授权者
+        permission_type VARCHAR(20) NOT NULL,  -- 'read', 'write', 'delete', 'admin'
+        granted_by INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        expires_at DATETIME, -- 权限过期时间，NULL表示永不过期
-        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE(document_id, user_id, permission)
+        FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE SET NULL
       );
     `;
 
     this.db.exec(sql);
 
     // 创建索引
-    this.db.exec(
-      'CREATE INDEX IF NOT EXISTS idx_permissions_document_id ON permissions(document_id);'
-    );
-    this.db.exec('CREATE INDEX IF NOT EXISTS idx_permissions_user_id ON permissions(user_id);');
-    this.db.exec(
-      'CREATE INDEX IF NOT EXISTS idx_permissions_expires_at ON permissions(expires_at);'
-    );
+    this.db.exec('CREATE INDEX IF NOT EXISTS idx_permissions_user ON permissions(user_id);');
+    this.db.exec('CREATE INDEX IF NOT EXISTS idx_permissions_resource ON permissions(resource_type, resource_id);');
 
     console.log('✓ 权限表 (permissions) 创建完成');
   }
@@ -312,55 +306,28 @@ export class DatabaseInitializer {
     const roles = [
       {
         name: 'admin',
-        display_name: '系统管理员',
-        description: '拥有系统所有权限，可以管理用户、文档和系统配置',
-        permissions: JSON.stringify([
-          'users.create',
-          'users.read',
-          'users.update',
-          'users.delete',
-          'documents.create',
-          'documents.read',
-          'documents.update',
-          'documents.delete',
-          'tags.create',
-          'tags.read',
-          'tags.update',
-          'tags.delete',
-          'system.config',
-          'system.monitor',
-        ]),
+        description: '系统管理员',
+        permissions: '["*"]',
       },
       {
         name: 'editor',
-        display_name: '编辑者',
-        description: '可以创建、编辑、删除自己的文档，查看公开文档',
-        permissions: JSON.stringify([
-          'documents.create',
-          'documents.read',
-          'documents.update',
-          'documents.delete.own',
-          'tags.create',
-          'tags.read',
-          'tags.update.own',
-          'tags.delete.own',
-        ]),
+        description: '编辑者',
+        permissions: '["document:read", "document:write", "document:delete", "tag:read", "tag:write"]',
       },
       {
         name: 'viewer',
-        display_name: '查看者',
-        description: '只能查看和下载公开文档',
-        permissions: JSON.stringify(['documents.read.public', 'tags.read']),
+        description: '查看者',
+        permissions: '["document:read", "tag:read"]',
       },
     ];
 
     const insertRole = this.db.prepare(`
-      INSERT OR IGNORE INTO roles (name, display_name, description, permissions)
-      VALUES (?, ?, ?, ?)
+      INSERT OR IGNORE INTO roles (name, description, permissions)
+      VALUES (?, ?, ?)
     `);
 
     for (const role of roles) {
-      insertRole.run(role.name, role.display_name, role.description, role.permissions);
+      insertRole.run(role.name, role.description, role.permissions);
     }
 
     console.log('✓ 角色数据插入完成 (admin, editor, viewer)');
@@ -375,11 +342,11 @@ export class DatabaseInitializer {
     const passwordHash = await bcrypt.hash(adminPassword, 10);
 
     const insertUser = this.db.prepare(`
-      INSERT OR IGNORE INTO users (username, email, password_hash, full_name)
-      VALUES (?, ?, ?, ?)
+      INSERT OR IGNORE INTO users (username, email, password_hash, full_name, role_id, status)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
 
-    const result = insertUser.run('admin', 'admin@example.com', passwordHash, '系统管理员');
+    const result = insertUser.run('admin', 'admin@example.com', passwordHash, '系统管理员', 1, 1);
 
     if (result.changes > 0) {
       // 获取admin用户ID和admin角色ID
@@ -408,46 +375,46 @@ export class DatabaseInitializer {
   private async seedSystemConfigs(): Promise<void> {
     const configs = [
       {
-        key: 'site_name',
-        value: '团队知识库管理工具',
-        description: '网站名称',
-        type: 'string',
-        is_public: 1,
+        key: 'app_name',
+        value: '团队知识库管理系统',
+        description: '应用名称',
+        category: 'basic',
       },
       {
         key: 'max_file_size',
-        value: '104857600', // 100MB
-        description: '文件上传最大大小（字节）',
-        type: 'number',
-        is_public: 1,
+        value: '52428800', // 50MB
+        description: '最大文件上传大小 (50MB)',
+        category: 'upload',
       },
       {
         key: 'allowed_file_types',
-        value: JSON.stringify([
-          '.pdf',
-          '.doc',
-          '.docx',
-          '.xls',
-          '.xlsx',
-          '.ppt',
-          '.pptx',
-          '.txt',
-          '.md',
-          '.jpg',
-          '.jpeg',
-          '.png',
-          '.gif',
-          '.zip',
-        ]),
+        value: '["pdf","doc","docx","ppt","pptx","xls","xlsx","txt","md","jpg","jpeg","png","gif"]',
         description: '允许上传的文件类型',
-        type: 'json',
-        is_public: 1,
+        category: 'upload',
+      },
+      {
+        key: 'default_visibility',
+        value: '2',
+        description: '默认文档可见性 (1:私有, 2:团队, 3:公开)',
+        category: 'document',
+      },
+      {
+        key: 'enable_comments',
+        value: 'true',
+        description: '是否启用文档评论功能',
+        category: 'feature',
+      },
+      {
+        key: 'enable_download_stats',
+        value: 'true',
+        description: '是否启用下载统计',
+        category: 'feature',
       },
       {
         key: 'jwt_expires_in',
         value: '24h',
         description: 'JWT令牌过期时间',
-        type: 'string',
+        category: 'auth',
         is_public: 0,
       },
       {
@@ -460,12 +427,12 @@ export class DatabaseInitializer {
     ];
 
     const insertConfig = this.db.prepare(`
-      INSERT OR IGNORE INTO system_configs (config_key, config_value, description, config_type, is_public)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT OR IGNORE INTO system_configs (config_key, config_value, description, category)
+      VALUES (?, ?, ?, ?)
     `);
 
     for (const config of configs) {
-      insertConfig.run(config.key, config.value, config.description, config.type, config.is_public);
+      insertConfig.run(config.key, config.value, config.description, config.category);
     }
 
     console.log('✓ 系统配置数据插入完成');

@@ -16,7 +16,7 @@ import {
   Divider,
   Tag,
   Alert,
-  Tooltip,
+  App,
 } from 'antd';
 import {
   InboxOutlined,
@@ -27,11 +27,11 @@ import type { UploadProps, UploadFile } from 'antd';
 import { documentService } from '../services/document';
 import { ErrorHandler } from '../utils/errorHandler';
 import { useThemeColors } from '../contexts/ThemeContext';
+import TagSelector from './TagSelector';
 import type { DocumentCreateRequest } from '../types';
 
 const { Dragger } = Upload;
 const { TextArea } = Input;
-const { Option } = Select;
 const { Text } = Typography;
 
 interface DocumentUploadProps {
@@ -42,7 +42,7 @@ interface DocumentUploadProps {
 interface DocumentFormData {
   title: string;
   description?: string;
-  tags: string[];
+  tags: number[];
   isPublic: boolean;
 }
 
@@ -62,6 +62,7 @@ interface UploadState {
 }
 
 const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) => {
+  const { message: messageApi } = App.useApp();
   const [form] = Form.useForm<DocumentFormData>();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewImage, setPreviewImage] = useState<string>('');
@@ -73,9 +74,9 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
     progress: 0,
     error: null,
     retryConfig: {
-      maxRetries: 3,
+      maxRetries: 2,
       currentRetry: 0,
-      intervals: [2, 5, 10], // 2秒, 5秒, 10秒
+      intervals: [2, 5], // 2秒, 5秒
     },
   });
 
@@ -179,9 +180,9 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
       progress: 0,
       error: null,
       retryConfig: {
-        maxRetries: 3,
+        maxRetries: 2,
         currentRetry: 0,
-        intervals: [2, 5, 10],
+        intervals: [2, 5],
       },
     });
   };
@@ -190,14 +191,15 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   // 执行上传的核心函数
-  const performUpload = async (uploadData: DocumentCreateRequest): Promise<void> => {
+  const performUpload = async (uploadData: DocumentCreateRequest, isRetry: boolean = false): Promise<void> => {
     try {
       await documentService.uploadDocument(uploadData);
       
       setUploadState(prev => ({ ...prev, progress: 100 }));
       await delay(500); // 给用户看到100%的时间
       
-      ErrorHandler.showSuccess('文档上传成功！');
+      // 使用App组件提供的message API
+      messageApi.success('文档上传成功！');
       form.resetFields();
       setFileList([]);
       setUploadState({
@@ -205,13 +207,19 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
         progress: 0,
         error: null,
         retryConfig: {
-          maxRetries: 3,
+          maxRetries: 2,
           currentRetry: 0,
-          intervals: [2, 5, 10],
+          intervals: [2, 5],
         },
       });
-      onSuccess?.();
+      
+      // 只有在非重试情况下才调用onSuccess回调，避免重复调用
+      if (!isRetry) {
+        onSuccess?.();
+      }
     } catch (error: any) {
+      // 使用App组件提供的message API
+      messageApi.error('文档上传失败，请稍后重试');
       const errorInfo = ErrorHandler.handleUploadError(error);
       throw errorInfo;
     }
@@ -250,7 +258,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
     }));
 
     try {
-      await performUpload(uploadData);
+      await performUpload(uploadData, true); // 标记为重试调用
     } catch (error) {
       // 继续重试
       await retryUpload(uploadData);
@@ -260,13 +268,13 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
   // 手动重试
   const handleManualRetry = async () => {
     if (fileList.length === 0) {
-      ErrorHandler.showError('请选择要上传的文件');
+      messageApi.error('请选择要上传的文件');
       return;
     }
 
     const values = form.getFieldsValue();
     if (!values.title) {
-      ErrorHandler.showError('请输入文档标题');
+      messageApi.error('请输入文档标题');
       return;
     }
 
@@ -292,7 +300,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
     }));
 
     try {
-      await performUpload(uploadData);
+      await performUpload(uploadData, true); // 标记为重试调用
     } catch (error) {
       await retryUpload(uploadData);
     }
@@ -301,7 +309,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
   // 提交上传
   const handleSubmit = async (values: DocumentFormData) => {
     if (fileList.length === 0) {
-      ErrorHandler.showError('请选择要上传的文件');
+      messageApi.error('请选择要上传的文件');
       return;
     }
 
@@ -318,7 +326,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
         file,
         title: values.title,
         description: values.description,
-        tags: values.tags || [],
+        tags: values.tags || [], // 确保传递正确的标签数组
         isPublic: values.isPublic,
       };
 
@@ -329,7 +337,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
         file: fileList[0].originFileObj as File,
         title: values.title,
         description: values.description,
-        tags: values.tags || [],
+        tags: values.tags || [], // 确保传递正确的标签数组
         isPublic: values.isPublic,
       };
       await retryUpload(uploadData);
@@ -508,20 +516,14 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onSuccess, onCancel }) 
               name="tags"
               label="标签"
             >
-              <Select
-                mode="tags"
+              <TagSelector
+                value={form.getFieldValue('tags') || []}
+                onChange={(tagIds) => form.setFieldValue('tags', tagIds)}
                 placeholder="添加标签（可选）"
-                tokenSeparators={[',']}
                 maxTagCount={5}
-                maxTagTextLength={20}
-              >
-                <Option value="重要">重要</Option>
-                <Option value="工作">工作</Option>
-                <Option value="学习">学习</Option>
-                <Option value="项目">项目</Option>
-                <Option value="文档">文档</Option>
-                <Option value="技术">技术</Option>
-              </Select>
+                mode="multiple"
+                allowCreate={true}
+              />
             </Form.Item>
           </Col>
           <Col span={12}>

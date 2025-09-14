@@ -1,18 +1,14 @@
 import React from 'react';
-import { Card, Typography, Button, Space, Row, Col, Tag, Alert } from 'antd';
-import { 
-  BgColorsOutlined, 
-  SunOutlined, 
-  MoonOutlined,
-  InfoCircleOutlined,
-} from '@ant-design/icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { Card, Typography, Space, Row, Col, Tag, Alert } from 'antd';
+import { BgColorsOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { useTheme, useThemeToggle } from '../contexts/ThemeContext';
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 export default function ThemeTestPage() {
   const { theme, colors, isDark } = useTheme();
+  const { setLight, setDark } = useThemeToggle();
 
   return (
     <div style={{ padding: '24px', minHeight: '100vh', background: colors.background }}>

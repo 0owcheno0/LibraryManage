@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Card, Form, Input, Button, Typography, Divider, Layout, Space } from 'antd';
+import { Card, Form, Input, Button, Typography, Divider, Layout } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';

@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Button,
-  Space,
-  Dropdown,
-  message,
-  Tooltip,
-} from 'antd';
+import { Button, Space, Dropdown, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import {
   EyeOutlined,
@@ -15,9 +9,7 @@ import {
   MoreOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { usePermission } from '../hooks/usePermission';
-import { useThemeColors } from '../contexts/ThemeContext';
 import { documentService } from '../services/document';
 import { ErrorHandler } from '../utils/errorHandler';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -38,7 +30,6 @@ const DocumentActions: React.FC<DocumentActionsProps> = ({
   type = 'default',
 }) => {
   const navigate = useNavigate();
-  const { state: authState } = useAuth();
   const { canEditDocument, canDeleteDocument, canViewDocument } = usePermission();
   const [loading, setLoading] = useState<{
     delete: boolean;
@@ -49,7 +40,6 @@ const DocumentActions: React.FC<DocumentActionsProps> = ({
   // 使用权限 hook 检查权限
   const canEdit = canEditDocument(document);
   const canDelete = canDeleteDocument(document);
-  const canView = canViewDocument(document);
 
   // 查看文档
   const handleView = async () => {

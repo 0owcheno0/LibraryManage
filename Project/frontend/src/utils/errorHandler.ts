@@ -316,11 +316,11 @@ export class ErrorHandler {
     const errorCount = errors.length;
     
     if (errorCount === 0) {
-      this.showSuccess(`操作成功，共处理 ${successCount} 项`);
+      this.showSuccess(`操作成功，共处理 ${successCount} 项，总计 ${totalCount} 项`);
     } else if (successCount > 0) {
-      this.showWarning(`部分操作成功：成功 ${successCount} 项，失败 ${errorCount} 项`);
+      this.showWarning(`部分操作成功：成功 ${successCount} 项，失败 ${errorCount} 项，总计 ${totalCount} 项`);
     } else {
-      this.showError(`操作失败，共 ${errorCount} 项失败`);
+      this.showError(`操作失败，共 ${errorCount} 项失败，总计 ${totalCount} 项`);
     }
     
     // 显示具体错误信息

@@ -42,10 +42,10 @@ CREATE TABLE IF NOT EXISTS documents (
     thumbnail_path VARCHAR(500),
     content_text TEXT,  -- 用于全文搜索的文档内容
     upload_user_id INTEGER NOT NULL,
-    visibility INTEGER DEFAULT 2,  -- 1: 私有, 2: 团队, 3: 公开
+    is_public BOOLEAN DEFAULT 0,  -- 0: 私有, 1: 公开
     download_count INTEGER DEFAULT 0,
     view_count INTEGER DEFAULT 0,
-    status INTEGER DEFAULT 1,  -- 1: 正常, 0: 删除
+    status VARCHAR(20) DEFAULT 'active',  -- active, deleted, archived
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (upload_user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -88,6 +88,21 @@ CREATE TABLE IF NOT EXISTS permissions (
     FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
+-- 创建分享链接表
+CREATE TABLE IF NOT EXISTS share_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    document_id INTEGER NOT NULL,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    expires_at DATETIME,
+    password_hash VARCHAR(255),
+    download_limit INTEGER,
+    download_count INTEGER DEFAULT 0,
+    created_by INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- 创建系统配置表
 CREATE TABLE IF NOT EXISTS system_configs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,12 +121,14 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);
 CREATE INDEX IF NOT EXISTS idx_documents_upload_user ON documents(upload_user_id);
 CREATE INDEX IF NOT EXISTS idx_documents_title ON documents(title);
 CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);
-CREATE INDEX IF NOT EXISTS idx_documents_visibility ON documents(visibility);
+CREATE INDEX IF NOT EXISTS idx_documents_is_public ON documents(is_public);
 CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name);
 CREATE INDEX IF NOT EXISTS idx_document_tags_document ON document_tags(document_id);
 CREATE INDEX IF NOT EXISTS idx_document_tags_tag ON document_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_permissions_user ON permissions(user_id);
 CREATE INDEX IF NOT EXISTS idx_permissions_resource ON permissions(resource_type, resource_id);
+CREATE INDEX IF NOT EXISTS idx_share_links_token ON share_links(token);
+CREATE INDEX IF NOT EXISTS idx_share_links_document ON share_links(document_id);
 
 -- 插入初始角色数据
 INSERT OR IGNORE INTO roles (id, name, description, permissions) VALUES 

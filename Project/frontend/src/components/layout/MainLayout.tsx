@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Avatar, Dropdown, Typography, Button, theme, Space } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, theme } from 'antd';
 import {
   DashboardOutlined,
   FileTextOutlined,
@@ -10,6 +10,7 @@ import {
   LogoutOutlined,
   MenuOutlined,
   SettingOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -35,7 +36,12 @@ export default function MainLayout() {
     {
       key: '/documents',
       icon: <FileTextOutlined />,
-      label: '文档管理',
+      label: '我的文档',
+    },
+    {
+      key: '/documents/team',
+      icon: <TeamOutlined />,
+      label: '团队文档',
     },
     {
       key: '/tags',

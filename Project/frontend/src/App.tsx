@@ -1,31 +1,37 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout, App as AntApp } from 'antd';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PrivateRoute } from './components/common/PrivateRoute';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import MainLayout from './components/layout/MainLayout';
+
+// 导入全局错误处理和网络拦截器
+import './utils/axiosInterceptors';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import DocumentListPage from './pages/documents/DocumentListPage';
 import DocumentDetailPage from './pages/documents/DocumentDetailPage';
+import TeamDocumentsPage from './pages/documents/TeamDocumentsPage';
 import TagManagementPage from './pages/tags/TagManagementPage';
 import SearchPage from './pages/search/SearchPage';
 import ProfilePage from './pages/user/ProfilePage';
 import SettingsPage from './pages/settings/SettingsPage';
 import ThemeTestPage from './pages/ThemeTestPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
 
 // 导入主题样式
 import './styles/theme.css';
 
 function App() {
   return (
-    <ThemeProvider>
-      <AntApp>
-        <AuthProvider>
-        <Layout style={{ minHeight: '100vh' }}>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AntApp>
+          <AuthProvider>
+          <Layout style={{ minHeight: '100vh' }}>
           <Routes>
             {/* 公开路由 */}
             <Route path="/login" element={<LoginPage />} />
@@ -43,12 +49,14 @@ function App() {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<DashboardPage />} />
               <Route path="documents" element={<DocumentListPage />} />
+              <Route path="documents/team" element={<TeamDocumentsPage />} />
               <Route path="documents/:id" element={<DocumentDetailPage />} />
               <Route path="tags" element={<TagManagementPage />} />
               <Route path="search" element={<SearchPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="theme-test" element={<ThemeTestPage />} />
+              <Route path="admin/users" element={<UserManagementPage />} />
             </Route>
 
             {/* 404重定向 */}
@@ -58,6 +66,7 @@ function App() {
         </AuthProvider>
       </AntApp>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

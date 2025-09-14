@@ -1,5 +1,6 @@
 import axios, { AxiosProgressEvent, CancelTokenSource } from 'axios';
 import { message } from 'antd';
+import { createAuthenticatedAxios } from './api/config';
 
 export interface DownloadProgress {
   loaded: number;
@@ -51,18 +52,18 @@ class DownloadService {
     try {
       onStart?.();
 
-      // 获取认证token
-      const token = localStorage.getItem('accessToken');
+      // 使用带认证的axios实例
+      const api = createAuthenticatedAxios();
       
-      const response = await axios.get(
-        `http://localhost:8000/api/v1/documents/${documentId}/download`,
+      // 修改baseURL以匹配后端API
+      const baseURL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+      
+      const response = await api.get(
+        `${baseURL}/documents/${documentId}/download`,
         {
           responseType: 'blob',
           timeout,
           cancelToken: cancelTokenSource.token,
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
           // Axios responseType: 'blob'
           onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
             const { loaded, total } = progressEvent;

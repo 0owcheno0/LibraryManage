@@ -156,7 +156,7 @@ router.post('/', authenticate, uploadSingleDocument, async (req: AuthenticatedRe
       friendly_type: fileInfo.metadata.friendlyType,
       formatted_size: fileInfo.metadata.formattedSize,
       is_public,
-      upload_user_id: Number(req.user.userId),
+      created_by: Number(req.user.userId),
       tag_ids
     };
 
@@ -322,7 +322,7 @@ router.get('/:id/download', optionalAuth, checkDocumentAccess, async (req: Permi
 
     // 权限验证：文档是否公开或用户有权访问
     const userId = req.user?.userId ? Number(req.user.userId) : null;
-    if (!document.is_public && (!userId || document.upload_user_id !== userId)) {
+    if (!document.is_public && (!userId || document.created_by !== userId)) {
       return res.error('无权限访问此文档', 403);
     }
 

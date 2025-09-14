@@ -16,7 +16,7 @@ export interface DocumentDetail {
   is_public: number;
   view_count: number;
   download_count: number;
-  upload_user_id: number;
+  created_by: number;
   created_at: string;
   updated_at: string;
   creator_name: string;
@@ -37,7 +37,7 @@ export interface DocumentListItem {
   is_public: number;
   view_count: number;
   download_count: number;
-  upload_user_id: number;
+  created_by: number;
   created_at: string;
   creator_name: string;
   tag_count: number;
@@ -92,13 +92,13 @@ export class DocumentDao {
       } = query;
 
       // 构建基础查询
-      let whereConditions: string[] = ['d.status = 1']; // 只查询未删除的文档
+      let whereConditions: string[] = ["d.status = 'active'"]; // 只查询未删除的文档
       let params: any[] = [];
       let joins: string[] = [];
 
       // 用户权限过滤
       if (userId !== undefined) {
-        whereConditions.push('(d.upload_user_id = ? OR d.is_public = 1)');
+        whereConditions.push('(d.created_by = ? OR d.is_public = 1)');
         params.push(userId);
       }
 
@@ -116,7 +116,7 @@ export class DocumentDao {
 
       // 创建者过滤
       if (createdBy) {
-        whereConditions.push('d.upload_user_id = ?');
+        whereConditions.push('d.created_by = ?');
         params.push(createdBy);
       }
 
@@ -142,7 +142,7 @@ export class DocumentDao {
       // 构建主查询
       const baseQuery = `
         FROM documents d
-        INNER JOIN users u ON d.upload_user_id = u.id
+        INNER JOIN users u ON d.created_by = u.id
         LEFT JOIN (
           SELECT document_id, COUNT(*) as tag_count
           FROM document_tags
@@ -173,7 +173,8 @@ export class DocumentDao {
           d.is_public,
           d.view_count,
           d.download_count,
-          d.upload_user_id,
+          d.created_by,
+          d.created_by as upload_user_id,
           d.created_at,
           u.full_name as creator_name,
           COALESCE(tc.tag_count, 0) as tag_count
@@ -211,8 +212,8 @@ export class DocumentDao {
           u.full_name as creator_name,
           u.email as creator_email
         FROM documents d
-        INNER JOIN users u ON d.upload_user_id = u.id
-        WHERE d.id = ? AND d.status = 1
+        INNER JOIN users u ON d.created_by = u.id
+        WHERE d.id = ? AND d.status = 'active'
       `;
       
       const document = db.prepare(documentQuery).get(id) as Omit<DocumentDetail, 'tags'> | undefined;
@@ -251,7 +252,7 @@ export class DocumentDao {
       const stmt = db.prepare(`
         UPDATE documents 
         SET view_count = view_count + 1, updated_at = datetime('now')
-        WHERE id = ? AND status = 1
+        WHERE id = ? AND status = 'active'
       `);
       
       const result = stmt.run(id);
@@ -271,7 +272,7 @@ export class DocumentDao {
       const stmt = db.prepare(`
         UPDATE documents 
         SET download_count = download_count + 1, updated_at = datetime('now')
-        WHERE id = ? AND status = 1
+        WHERE id = ? AND status = 'active'
       `);
       
       const result = stmt.run(id);
@@ -315,7 +316,7 @@ export class DocumentDao {
       const stmt = db.prepare(`
         UPDATE documents 
         SET ${fields.join(', ')} 
-        WHERE id = ? AND status = 1
+        WHERE id = ? AND status = 'active'
       `);
 
       const result = stmt.run(...values);
@@ -337,8 +338,8 @@ export class DocumentDao {
         // 软删除文档
         const deleteDocStmt = db.prepare(`
           UPDATE documents 
-          SET status = 0, updated_at = datetime('now')
-          WHERE id = ? AND status = 1
+          SET status = 'deleted', updated_at = datetime('now')
+          WHERE id = ? AND status = 'active'
         `);
         const result = deleteDocStmt.run(docId);
         
@@ -377,12 +378,12 @@ export class DocumentDao {
         return { 
           hasAccess: true, 
           document,
-          isOwner: userId ? document.upload_user_id === userId : false
+          isOwner: userId ? document.created_by === userId : false
         };
       }
 
-      // 私有文档只有创建者可以访问
-      if (userId && document.upload_user_id === userId) {
+      // 私有文档只有创建者可以访问  
+      if (userId && document.created_by === userId) {
         return { 
           hasAccess: true, 
           document,
@@ -406,7 +407,7 @@ export class DocumentDao {
       const stmt = db.prepare(`
         SELECT COUNT(*) as count 
         FROM documents 
-        WHERE id = ? AND upload_user_id = ? AND status = 1
+        WHERE id = ? AND created_by = ? AND status = 'active'
       `);
       
       const result = stmt.get(id, userId) as { count: number };
@@ -442,7 +443,7 @@ export class DocumentDao {
           COALESCE(SUM(view_count), 0) as totalViews,
           COALESCE(SUM(download_count), 0) as totalDownloads
         FROM documents 
-        WHERE status = 1
+        WHERE status = 'active'
       `;
       
       const stats = db.prepare(statsQuery).get() as {
@@ -468,7 +469,7 @@ export class DocumentDao {
         const myDocsStmt = db.prepare(`
           SELECT COUNT(*) as count 
           FROM documents 
-          WHERE upload_user_id = ? AND status = 1
+          WHERE created_by = ? AND status = 'active'
         `);
         const myDocs = myDocsStmt.get(userId) as { count: number };
         result.myDocuments = myDocs.count;

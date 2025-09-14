@@ -304,3 +304,42 @@ export const checkPermission = (level: PermissionLevel) => {
     }
   };
 };
+
+/**
+ * 基于角色的权限检查中间件
+ * @param allowedRoles 允许的角色列表
+ */
+export const hasPermission = (allowedRoles: string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          code: 401,
+          message: '用户未认证，请先登录',
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      // 检查用户角色是否在允许列表中
+      const userRole = req.user.role || 'viewer'; // 默认为 viewer 角色
+      if (!allowedRoles.includes(userRole)) {
+        res.status(403).json({
+          code: 403,
+          message: `需要以下角色之一: ${allowedRoles.join(', ')}，当前角色: ${userRole}`,
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      next();
+    } catch (error) {
+      console.error('角色验证失败:', error);
+      res.status(500).json({
+        code: 500,
+        message: '权限验证失败',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  };
+};

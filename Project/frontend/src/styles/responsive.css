@@ -1,0 +1,416 @@
+/**
+ * 响应式样式
+ * 提供全局响应式布局和组件样式
+ */
+
+/* 断点变量定义 */
+:root {
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
+  
+  /* 间距变量 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* 字体大小变量 */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+}
+
+/* 容器响应式样式 */
+.responsive-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+@media (min-width: 576px) {
+  .responsive-container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .responsive-container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .responsive-container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .responsive-container {
+    max-width: 1520px;
+  }
+}
+
+/* 响应式网格系统 */
+.responsive-grid {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 576px) {
+  .responsive-grid.cols-sm-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .responsive-grid.cols-sm-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .responsive-grid.cols-md-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .responsive-grid.cols-md-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .responsive-grid.cols-md-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .responsive-grid.cols-lg-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .responsive-grid.cols-lg-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .responsive-grid.cols-lg-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .responsive-grid.cols-lg-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* 响应式文本大小 */
+.responsive-text-xs {
+  font-size: var(--font-size-xs);
+}
+
+.responsive-text-sm {
+  font-size: var(--font-size-sm);
+}
+
+.responsive-text-md {
+  font-size: var(--font-size-md);
+}
+
+.responsive-text-lg {
+  font-size: var(--font-size-lg);
+}
+
+.responsive-text-xl {
+  font-size: var(--font-size-xl);
+}
+
+@media (max-width: 767px) {
+  .responsive-text-mobile-sm {
+    font-size: var(--font-size-xs);
+  }
+  .responsive-text-mobile-md {
+    font-size: var(--font-size-sm);
+  }
+  .responsive-text-mobile-lg {
+    font-size: var(--font-size-md);
+  }
+}
+
+/* 响应式间距 */
+.responsive-padding-xs {
+  padding: var(--spacing-xs);
+}
+
+.responsive-padding-sm {
+  padding: var(--spacing-sm);
+}
+
+.responsive-padding-md {
+  padding: var(--spacing-md);
+}
+
+.responsive-padding-lg {
+  padding: var(--spacing-lg);
+}
+
+@media (max-width: 767px) {
+  .responsive-padding-mobile-sm {
+    padding: var(--spacing-xs);
+  }
+  .responsive-padding-mobile-md {
+    padding: var(--spacing-sm);
+  }
+}
+
+/* 响应式显示/隐藏 */
+.hidden-xs {
+  display: none !important;
+}
+
+@media (min-width: 576px) {
+  .hidden-xs {
+    display: block !important;
+  }
+  .hidden-sm {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .hidden-sm {
+    display: block !important;
+  }
+  .hidden-md {
+    display: none !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .hidden-md {
+    display: block !important;
+  }
+  .hidden-lg {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .hidden-lg {
+    display: block !important;
+  }
+  .hidden-xl {
+    display: none !important;
+  }
+}
+
+/* 仅移动端显示 */
+.visible-mobile {
+  display: block !important;
+}
+
+@media (min-width: 768px) {
+  .visible-mobile {
+    display: none !important;
+  }
+}
+
+/* 仅桌面端显示 */
+.visible-desktop {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .visible-desktop {
+    display: block !important;
+  }
+}
+
+/* 响应式表格 */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 767px) {
+  .responsive-table .ant-table-thead {
+    display: none;
+  }
+  
+  .responsive-table .ant-table-tbody > tr {
+    display: block;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 8px;
+    padding: 12px;
+    border-radius: 6px;
+  }
+  
+  .responsive-table .ant-table-tbody > tr > td {
+    display: block;
+    border: none;
+    padding: 4px 0;
+  }
+  
+  .responsive-table .ant-table-tbody > tr > td::before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+    display: inline-block;
+    width: 100px;
+  }
+}
+
+/* 移动端导航菜单 */
+.mobile-menu {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.mobile-menu-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 响应式卡片 */
+@media (max-width: 767px) {
+  .ant-card {
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .ant-card-body {
+    padding: var(--spacing-sm) !important;
+  }
+  
+  .ant-card-head {
+    padding: 0 var(--spacing-sm);
+    min-height: 48px;
+  }
+  
+  .ant-card-head-title {
+    font-size: var(--font-size-md);
+  }
+}
+
+/* 响应式按钮 */
+@media (max-width: 767px) {
+  .ant-btn {
+    height: 36px;
+    font-size: var(--font-size-sm);
+  }
+  
+  .ant-btn-lg {
+    height: 42px;
+    font-size: var(--font-size-md);
+  }
+  
+  .responsive-btn-block {
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+/* 响应式表单 */
+@media (max-width: 767px) {
+  .ant-form-item {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .ant-form-item-label {
+    padding-bottom: var(--spacing-xs);
+  }
+  
+  .ant-form-item-label > label {
+    font-size: var(--font-size-sm);
+  }
+  
+  .ant-input, .ant-select-selector {
+    font-size: var(--font-size-md);
+    height: 40px;
+  }
+}
+
+/* 响应式模态框 */
+@media (max-width: 767px) {
+  .ant-modal {
+    margin: var(--spacing-md);
+    max-width: calc(100vw - 32px);
+  }
+  
+  .ant-modal-content {
+    border-radius: 8px;
+  }
+  
+  .ant-modal-header {
+    padding: var(--spacing-md);
+  }
+  
+  .ant-modal-body {
+    padding: var(--spacing-md);
+  }
+  
+  .ant-modal-footer {
+    padding: var(--spacing-md);
+    text-align: center;
+  }
+  
+  .ant-modal-footer .ant-btn {
+    width: 100%;
+    margin: 0 0 var(--spacing-sm) 0;
+  }
+}
+
+/* 触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+  .ant-btn, .ant-input, .ant-select-selector {
+    min-height: 44px; /* iOS 推荐的最小触摸目标 */
+  }
+  
+  .touchable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .touchable:active {
+    opacity: 0.7;
+  }
+}
+
+/* 横屏适配 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .mobile-landscape-compact .ant-modal {
+    margin: var(--spacing-sm);
+    max-height: calc(100vh - 16px);
+  }
+  
+  .mobile-landscape-compact .ant-modal-body {
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+  }
+}

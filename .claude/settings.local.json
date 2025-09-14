@@ -11,7 +11,8 @@
       "Bash(curl:*)",
       "Bash(./start.sh:*)",
       "Bash(pkill:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

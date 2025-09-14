@@ -109,7 +109,11 @@ authenticatedAxios.interceptors.response.use(
           ? '网络连接异常，请检查网络设置'
           : '服务器暂时不可用，请稍后重试';
         
-        message.error(errorMessage);
+        notification.error({
+          message: '请求失败',
+          description: errorMessage,
+          placement: 'topRight'
+        });
         
         // 记录错误到日志服务
         logErrorToService(error, 'axios-retry-failed');
@@ -123,8 +127,11 @@ authenticatedAxios.interceptors.response.use(
       const errorData: any = error.response.data || {};
       const errorMessage = errorData?.message || '请求处理失败';
       
-      // 显示具体错误信息
-      message.error(errorMessage);
+      notification.error({
+        message: '请求错误',
+        description: errorMessage,
+        placement: 'topRight'
+      });
       
       // 记录客户端错误
       console.error('客户端请求错误:', {

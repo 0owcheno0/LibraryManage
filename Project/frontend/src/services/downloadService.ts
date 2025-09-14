@@ -1,6 +1,7 @@
 import axios, { AxiosProgressEvent, CancelTokenSource } from 'axios';
 import { message } from 'antd';
 import { createAuthenticatedAxios } from './api/config';
+import { ErrorHandler } from '../utils/errorHandler';
 
 export interface DownloadProgress {
   loaded: number;
@@ -131,8 +132,8 @@ class DownloadService {
         message.info('下载已取消');
       } else {
         console.error('下载失败:', error);
-        const errorMessage = this.getErrorMessage(error);
-        message.error(errorMessage);
+        const errorInfo = ErrorHandler.handleApiError(error);
+        message.error(errorInfo.message);
         onError?.(error as Error);
       }
     } finally {
@@ -218,7 +219,8 @@ class DownloadService {
     }
 
     // 所有重试都失败
-    const errorMessage = `下载失败，已重试 ${maxRetries} 次：${this.getErrorMessage(lastError)}`;
+    const errorInfo = ErrorHandler.handleApiError(lastError);
+    const errorMessage = `下载失败，已重试 ${maxRetries} 次：${errorInfo.message}`;
     message.error(errorMessage);
     throw new Error(errorMessage);
   }
@@ -267,32 +269,6 @@ class DownloadService {
     message.success(`批量下载完成！成功下载 ${completed} 个文档`);
   }
 
-  /**
-   * 获取错误信息
-   */
-  private getErrorMessage(error: any): string {
-    if (axios.isAxiosError(error)) {
-      if (error.code === 'ECONNABORTED') {
-        return '下载超时，请检查网络连接';
-      }
-      if (error.response) {
-        switch (error.response.status) {
-          case 401:
-            return '未授权，请重新登录';
-          case 403:
-            return '无权限下载此文档';
-          case 404:
-            return '文档不存在或已被删除';
-          case 500:
-            return '服务器错误，请稍后重试';
-          default:
-            return error.response.data?.message || '下载失败';
-        }
-      }
-      return '网络错误，请检查网络连接';
-    }
-    return error?.message || '未知错误';
-  }
 
   /**
    * 格式化文件大小

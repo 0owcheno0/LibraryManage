@@ -96,7 +96,7 @@ export class PermissionDao {
       const ownerCheck = db.prepare(`
         SELECT COUNT(*) as count 
         FROM documents 
-        WHERE id = ? AND upload_user_id = ?
+        WHERE id = ? AND created_by = ?
       `).get(documentId, userId) as { count: number };
       
       if (ownerCheck.count > 0) {

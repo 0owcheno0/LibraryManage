@@ -62,7 +62,7 @@ export interface Document {
   is_public: number;
   view_count: number;
   download_count: number;
-  upload_user_id: number;
+  created_by: number;
   created_at: string;
   updated_at: string;
   creator_name: string;

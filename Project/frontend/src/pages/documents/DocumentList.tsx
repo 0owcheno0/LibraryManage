@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Table,
   Button,
@@ -49,6 +49,7 @@ const DocumentList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
   const [uploadModalVisible, setUploadModalVisible] = useState<boolean>(false);
+  const [searchKeyword, setSearchKeyword] = useState<string>(''); // 本地搜索状态
 
   // 筛选条件
   const [filters, setFilters] = useState<DocumentListParams>({
@@ -57,6 +58,29 @@ const DocumentList: React.FC = () => {
     sortBy: 'created_at',
     sortOrder: 'DESC',
   });
+
+  // 防抖搜索
+  const debouncedSearch = useCallback(
+    useMemo(
+      () => {
+        let timeoutId: NodeJS.Timeout;
+        return (keyword: string) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            setFilters(prev => ({ ...prev, keyword: keyword || undefined }));
+            setCurrentPage(1); // 搜索时重置到第一页
+          }, 500); // 500ms 延迟
+        };
+      },
+      []
+    ),
+    []
+  );
+
+  // 监听搜索关键词变化
+  useEffect(() => {
+    debouncedSearch(searchKeyword);
+  }, [searchKeyword, debouncedSearch]);
 
   // 获取文档列表
   const fetchDocuments = async () => {
@@ -340,10 +364,12 @@ const DocumentList: React.FC = () => {
           <Col span={8}>
             <Search
               placeholder="搜索文档标题或描述"
-              value={filters.keyword || ''}
-              onChange={(e) => updateFilter('keyword', e.target.value)}
-              onSearch={fetchDocuments}
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onSearch={() => debouncedSearch(searchKeyword)}
               enterButton={<SearchOutlined />}
+              allowClear
+              onClear={() => setSearchKeyword('')}
             />
           </Col>
           <Col span={4}>
@@ -353,14 +379,23 @@ const DocumentList: React.FC = () => {
               onChange={(value) => updateFilter('mimeType', value)}
               allowClear
               style={{ width: '100%' }}
+              showSearch
+              optionFilterProp="children"
             >
-              <Option value="application/pdf">PDF</Option>
-              <Option value="application/msword">Word文档</Option>
-              <Option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">Word文档</Option>
-              <Option value="application/vnd.ms-excel">Excel表格</Option>
-              <Option value="text/plain">文本文件</Option>
-              <Option value="image/jpeg">JPEG图片</Option>
-              <Option value="image/png">PNG图片</Option>
+              <Option value="application/pdf">📄 PDF</Option>
+              <Option value="application/msword">📝 Word (.doc)</Option>
+              <Option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">📝 Word (.docx)</Option>
+              <Option value="application/vnd.ms-excel">📊 Excel (.xls)</Option>
+              <Option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">📊 Excel (.xlsx)</Option>
+              <Option value="application/vnd.ms-powerpoint">📋 PowerPoint (.ppt)</Option>
+              <Option value="application/vnd.openxmlformats-officedocument.presentationml.presentation">📋 PowerPoint (.pptx)</Option>
+              <Option value="text/plain">📃 文本文件</Option>
+              <Option value="text/markdown">📃 Markdown</Option>
+              <Option value="image/jpeg">🖼️ JPEG</Option>
+              <Option value="image/png">🖼️ PNG</Option>
+              <Option value="image/gif">🖼️ GIF</Option>
+              <Option value="application/zip">📦 ZIP压缩包</Option>
+              <Option value="application/x-rar-compressed">📦 RAR压缩包</Option>
             </Select>
           </Col>
           <Col span={4}>
@@ -391,10 +426,11 @@ const DocumentList: React.FC = () => {
           empty={!loading && documents.length === 0}
           skeleton={<DocumentListSkeleton rows={pageSize} />}
           emptyComponent={
-            filters.keyword ? (
+            searchKeyword ? (
               <EmptySearch 
-                keyword={filters.keyword}
+                keyword={searchKeyword}
                 onClearSearch={() => {
+                  setSearchKeyword('');
                   setFilters(prev => ({ ...prev, keyword: undefined }));
                 }}
               />

@@ -66,7 +66,7 @@ async function testDatabasePerformance() {
       sql: `
         SELECT d.*, u.username, GROUP_CONCAT(t.name) as tags
         FROM documents d
-        LEFT JOIN users u ON d.upload_user_id = u.id
+        LEFT JOIN users u ON d.created_by = u.id
         LEFT JOIN document_tags dt ON d.id = dt.document_id
         LEFT JOIN tags t ON dt.tag_id = t.id
         WHERE d.status = ?
@@ -90,7 +90,7 @@ async function testDatabasePerformance() {
       sql: `
         SELECT COUNT(*) as total_docs,
                AVG(file_size) as avg_size,
-               COUNT(DISTINCT upload_user_id) as unique_users
+               COUNT(DISTINCT created_by) as unique_users
         FROM documents 
         WHERE status = ?
       `,

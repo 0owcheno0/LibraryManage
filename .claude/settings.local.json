@@ -14,7 +14,8 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(timeout 10s npm run dev:backend)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(open http://localhost:3000)"
     ],
     "deny": [],
     "ask": []

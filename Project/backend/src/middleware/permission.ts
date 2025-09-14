@@ -127,7 +127,8 @@ export const checkDocumentAccess = async (req: PermissionRequest, res: Response,
     const userId = req.user?.userId ? Number(req.user.userId) : undefined;
 
     // 检查文档访问权限
-    const accessResult = await DocumentDao.checkDocumentAccess(documentId, userId);
+    const userRole = req.user?.role;
+    const accessResult = await DocumentDao.checkDocumentAccess(documentId, userId, userRole);
     
     if (!accessResult.hasAccess) {
       return res.error('文档不存在或无权限访问', 404);
@@ -160,7 +161,8 @@ export const checkDocumentReadAccess = async (req: PermissionRequest, res: Respo
     const userId = req.user?.userId ? Number(req.user.userId) : undefined;
 
     // 检查文档访问权限
-    const accessResult = await DocumentDao.checkDocumentAccess(documentId, userId);
+    const userRole = req.user?.role;
+    const accessResult = await DocumentDao.checkDocumentAccess(documentId, userId, userRole);
     
     if (!accessResult.hasAccess) {
       return res.error('文档不存在或无权限访问', 404);
@@ -231,12 +233,18 @@ export const optionalAuth = (req: AuthenticatedRequest, res: Response, next: Nex
   const token = authHeader.substring(7);
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const accessTokenSecret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET || 'your-access-secret-key';
+    console.log(`[DEBUG] JWT验证 - JWT_SECRET: ${process.env.JWT_SECRET}`);
+    console.log(`[DEBUG] JWT验证 - JWT_ACCESS_SECRET: ${process.env.JWT_ACCESS_SECRET}`);
+    console.log(`[DEBUG] JWT验证 - 使用SECRET: ${accessTokenSecret}`);
+    const decoded = jwt.verify(token, accessTokenSecret) as any;
+    console.log(`[DEBUG] JWT验证成功 - 用户: ${decoded.email}, 角色: ${decoded.role}`);
     req.user = decoded;
     next();
   } catch (error) {
     // token无效，但继续执行（作为匿名用户）
     console.warn('无效的JWT token，作为匿名用户继续:', error);
+    console.log(`[DEBUG] JWT验证失败 - Token: ${token.substring(0, 20)}...`);
     next();
   }
 };
@@ -268,7 +276,8 @@ export const checkPermission = (level: PermissionLevel) => {
       switch (level) {
         case PermissionLevel.READ:
           // 读取权限：公开文档或文档所有者
-          const readAccess = await DocumentDao.checkDocumentAccess(documentId, userId);
+          const userRole = req.user?.role;
+          const readAccess = await DocumentDao.checkDocumentAccess(documentId, userId, userRole);
           if (!readAccess.hasAccess) {
             return res.error('无权限访问此文档', 403);
           }

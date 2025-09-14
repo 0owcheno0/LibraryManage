@@ -17,7 +17,7 @@ const exampleDocument: Document = {
   friendly_type: 'PDF文档',
   formatted_size: '1.0 MB',
   is_public: 0, // 私有文档
-  upload_user_id: 1,
+  created_by: 1,
   creator_name: '张三',
   creator_username: 'zhangsan',
   view_count: 10,
@@ -37,10 +37,8 @@ const PermissionDemo: React.FC = () => {
     hasRole,
     isAdmin,
     isEditor,
-    canViewDocument,
     canEditDocument,
     canDeleteDocument,
-    canDownloadDocument,
     canUploadDocument,
     canManageDocuments,
     getDocumentPermissions,
@@ -122,7 +120,7 @@ const PermissionDemo: React.FC = () => {
                 {exampleDocument.title}
               </Descriptions.Item>
               <Descriptions.Item label="创建者ID">
-                {exampleDocument.upload_user_id}
+                {exampleDocument.created_by}
               </Descriptions.Item>
               <Descriptions.Item label="是否公开">
                 {exampleDocument.is_public ? '是' : '否'}
@@ -135,20 +133,11 @@ const PermissionDemo: React.FC = () => {
             <div>
               <h4>权限检查结果：</h4>
               <Space wrap>
-                <Tag color={permissions.canView ? 'success' : 'error'}>
-                  查看: {permissions.canView ? '允许' : '禁止'}
-                </Tag>
-                <Tag color={permissions.canDownload ? 'success' : 'error'}>
-                  下载: {permissions.canDownload ? '允许' : '禁止'}
-                </Tag>
                 <Tag color={permissions.canEdit ? 'success' : 'error'}>
                   编辑: {permissions.canEdit ? '允许' : '禁止'}
                 </Tag>
                 <Tag color={permissions.canDelete ? 'success' : 'error'}>
                   删除: {permissions.canDelete ? '允许' : '禁止'}
-                </Tag>
-                <Tag color={permissions.canChangePermission ? 'success' : 'error'}>
-                  修改权限: {permissions.canChangePermission ? '允许' : '禁止'}
                 </Tag>
               </Space>
             </div>
@@ -158,9 +147,6 @@ const PermissionDemo: React.FC = () => {
               <Space wrap>
                 <Tag color={permissions.isOwner ? 'purple' : 'default'}>
                   文档所有者: {permissions.isOwner ? '是' : '否'}
-                </Tag>
-                <Tag color={permissions.isAdmin ? 'red' : 'default'}>
-                  管理员权限: {permissions.isAdmin ? '是' : '否'}
                 </Tag>
               </Space>
             </div>
@@ -192,5 +178,3 @@ const PermissionDemo: React.FC = () => {
 };
 
 export default PermissionDemo;
-
-

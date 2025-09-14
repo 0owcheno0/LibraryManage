@@ -41,14 +41,14 @@ CREATE TABLE IF NOT EXISTS documents (
     mime_type VARCHAR(100),
     thumbnail_path VARCHAR(500),
     content_text TEXT,  -- 用于全文搜索的文档内容
-    upload_user_id INTEGER NOT NULL,
+    created_by INTEGER NOT NULL,
     is_public BOOLEAN DEFAULT 0,  -- 0: 私有, 1: 公开
     download_count INTEGER DEFAULT 0,
     view_count INTEGER DEFAULT 0,
     status VARCHAR(20) DEFAULT 'active',  -- active, deleted, archived
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (upload_user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- 创建标签表
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS system_configs (
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role_id);
-CREATE INDEX IF NOT EXISTS idx_documents_upload_user ON documents(upload_user_id);
+CREATE INDEX IF NOT EXISTS idx_documents_created_by ON documents(created_by);
 CREATE INDEX IF NOT EXISTS idx_documents_title ON documents(title);
 CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);
 CREATE INDEX IF NOT EXISTS idx_documents_is_public ON documents(is_public);

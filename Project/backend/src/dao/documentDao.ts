@@ -41,6 +41,7 @@ export interface DocumentListItem {
   created_at: string;
   creator_name: string;
   tag_count: number;
+  tags?: Array<{ id: number; name: string; color: string }>;
 }
 
 export interface DocumentQuery {
@@ -173,8 +174,7 @@ export class DocumentDao {
           d.is_public,
           d.view_count,
           d.download_count,
-          d.created_by,
-          d.created_by as upload_user_id,
+          d.created_by as created_by,
           d.created_at,
           u.full_name as creator_name,
           COALESCE(tc.tag_count, 0) as tag_count
@@ -201,8 +201,17 @@ export class DocumentDao {
         }
       });
 
+      // 为每个文档获取标签信息
+      const documentsWithTags = await Promise.all(decodedDocuments.map(async (doc) => {
+        const tags = await this.getDocumentTags(doc.id);
+        return {
+          ...doc,
+          tags
+        };
+      }));
+
       return {
-        documents: decodedDocuments,
+        documents: documentsWithTags,
         total,
         page,
         pageSize
@@ -210,6 +219,27 @@ export class DocumentDao {
     } catch (error) {
       console.error('获取文档列表失败:', error);
       throw error;
+    }
+  }
+
+  /**
+   * 获取文档标签
+   */
+  static async getDocumentTags(documentId: number): Promise<Array<{ id: number; name: string; color: string }>> {
+    try {
+      const db = this.getDb();
+      const tagsQuery = `
+        SELECT t.id, t.name, t.color
+        FROM tags t
+        INNER JOIN document_tags dt ON t.id = dt.tag_id
+        WHERE dt.document_id = ?
+        ORDER BY t.name
+      `;
+      
+      return db.prepare(tagsQuery).all(documentId) as Array<{ id: number; name: string; color: string }>;
+    } catch (error) {
+      console.error('获取文档标签失败:', error);
+      return [];
     }
   }
 
@@ -391,15 +421,29 @@ export class DocumentDao {
   /**
    * 检查文档访问权限
    */
-  static async checkDocumentAccess(id: number, userId?: number): Promise<{
+  static async checkDocumentAccess(id: number, userId?: number, userRole?: string): Promise<{
     hasAccess: boolean;
     document?: DocumentDetail;
     isOwner?: boolean;
   }> {
     try {
+      console.log(`[DEBUG] checkDocumentAccess: id=${id}, userId=${userId}, userRole=${userRole}`);
       const document = await this.getDocumentById(id);
       if (!document) {
+        console.log(`[DEBUG] Document ${id} not found`);
         return { hasAccess: false };
+      }
+
+      console.log(`[DEBUG] Found document: id=${document.id}, is_public=${document.is_public}, created_by=${document.created_by}`);
+
+      // 管理员可以访问所有文档
+      if (userRole === 'admin') {
+        console.log(`[DEBUG] Admin access granted for document ${id}`);
+        return {
+          hasAccess: true,
+          document,
+          isOwner: userId ? document.created_by === userId : false
+        };
       }
 
       // 公开文档所有人都能访问

@@ -15,8 +15,8 @@ import {
 import type { CustomTagProps } from 'rc-select/lib/BaseSelect';
 import { PlusOutlined, TagsOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
-import axios from 'axios';
-import { createAuthenticatedAxios } from '../services/api/config';
+import { tagService } from '../services/tag';
+import { ErrorHandler } from '../utils/errorHandler';
 
 const { Text } = Typography;
 
@@ -72,36 +72,31 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   const loadTags = async (keyword?: string) => {
     setLoading(true);
     try {
-      // 使用统一配置的axios实例
-      const api = createAuthenticatedAxios();
-      
       let response;
       if (keyword && keyword.trim()) {
         // 使用搜索接口
-        response = await api.get('/tags/search', {
-          params: { keyword: keyword.trim(), limit: 50 }
+        response = await tagService.searchTags({ 
+          keyword: keyword.trim(), 
+          limit: 50 
         });
-        if (response.data.code === 200) {
-          setTags(response.data.data.tags.map((tag: any) => ({
-            ...tag,
-            document_count: tag.document_count || 0
-          })));
-        }
       } else {
         // 获取所有标签
-        response = await api.get('/tags', {
-          params: { pageSize: 100, sortBy: 'usage_count', sortOrder: 'DESC' }
-        });
-        if (response.data.code === 200) {
-          setTags(response.data.data.tags.map((tag: any) => ({
-            ...tag,
-            document_count: tag.document_count || 0
-          })));
-        }
+        response = await tagService.getTags();
       }
-    } catch (error) {
-      console.error('Load tags error:', error);
-      // 静默处理错误，不显示错误消息以避免影响用户体验
+      
+      // 修复：正确处理响应数据结构
+      const tagData = response.data && Array.isArray(response.data) 
+        ? response.data 
+        : response.data?.tags || [];
+      
+      setTags(tagData.map((tag: any) => ({
+        ...tag,
+        document_count: tag.document_count || 0
+      })));
+    } catch (error: any) {
+      // 使用统一的错误处理器，但静默处理以避免影响用户体验
+      const errorInfo = ErrorHandler.handleApiError(error);
+      console.error('加载标签失败:', errorInfo);
     } finally {
       setLoading(false);
     }
@@ -110,65 +105,30 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   // 创建新标签
   const handleCreateTag = async (values: CreateTagForm) => {
     try {
-      // 使用统一配置的axios实例
-      const api = createAuthenticatedAxios();
+      const response = await tagService.createTag(values);
       
-      const response = await api.post('/tags', values);
+      const newTag = response.data;
+      messageApi.success('标签创建成功');
+      setCreateModalVisible(false);
+      createForm.resetFields();
       
-      if (response.data.code === 201) {
-        const newTag = response.data.data;
-        messageApi.success('标签创建成功');
-        setCreateModalVisible(false);
-        createForm.resetFields();
-        
-        // 更新标签列表
-        setTags(prev => [{ 
-          ...newTag, 
-          document_count: 0 
-        }, ...prev]);
-        
-        // 自动选中新创建的标签
-        if (onChange) {
-          const newValue = [...value, newTag.id];
-          onChange(newValue);
-        }
-      } else {
-        messageApi.error(response.data.message || '标签创建失败');
+      // 更新标签列表
+      setTags(prev => [{ 
+        ...newTag, 
+        document_count: 0 
+      }, ...prev]);
+      
+      // 自动选中新创建的标签
+      if (onChange) {
+        const newValue = [...value, newTag.id];
+        onChange(newValue);
       }
     } catch (error: any) {
-      console.error('Create tag error:', error);
+      // 使用统一的错误处理器
+      const errorInfo = ErrorHandler.handleApiError(error);
+      messageApi.error(errorInfo.message);
       
-      // 处理不同类型的错误，防止页面跳转
-      const status = error.response?.status;
-      const errorData = error.response?.data;
-      
-      let errorMessage = '标签创建失败';
-      
-      if (status === 401) {
-        errorMessage = '登录状态已过期，请重新登录后再试';
-      } else if (status === 403) {
-        errorMessage = '您没有权限创建标签，请联系管理员';
-      } else if (status === 409) {
-        errorMessage = '标签名称已存在，请使用其他名称';
-      } else if (status === 400) {
-        errorMessage = errorData?.message || '请求参数错误，请检查标签信息';
-      } else if (status >= 500) {
-        errorMessage = '服务器暂时不可用，请稍后再试';
-      } else if (errorData?.message) {
-        errorMessage = errorData.message;
-      } else if (!error.response) {
-        errorMessage = '网络连接失败，请检查网络设置';
-      }
-      
-      // 只显示错误信息，不触发页面跳转
-      messageApi.error(errorMessage);
-      
-      // 记录错误用于调试，但不重新抛出
-      console.error('Tag creation failed:', {
-        status,
-        message: errorMessage,
-        originalError: error
-      });
+      console.error('标签创建失败:', errorInfo);
     }
   };
 
@@ -458,16 +418,14 @@ export const SimpleTagSelector: React.FC<{
   const loadPopularTags = async () => {
     setLoading(true);
     try {
-      const api = createAuthenticatedAxios();
-      const response = await api.get('/tags/popular', { 
-        params: { limit: 20 } 
-      });
-      
-      if (response.data.code === 200) {
-        setPopularTags(response.data.data.tags);
-      }
-    } catch (error) {
-      console.error('Load popular tags error:', error);
+      const response = await tagService.getPopularTags();
+      // 修复：正确处理响应数据结构
+      const tagData = response.data?.tags || [];
+      setPopularTags(tagData.slice(0, 20) || []);
+    } catch (error: any) {
+      // 使用统一的错误处理器，但静默处理以避免影响用户体验
+      const errorInfo = ErrorHandler.handleApiError(error);
+      console.error('加载热门标签失败:', errorInfo);
     } finally {
       setLoading(false);
     }

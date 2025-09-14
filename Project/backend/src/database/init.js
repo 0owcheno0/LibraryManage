@@ -77,14 +77,14 @@ db.serialize(() => {
       mime_type VARCHAR(100),
       thumbnail_path VARCHAR(500),
       content_text TEXT,
-      upload_user_id INTEGER NOT NULL,
+      created_by INTEGER NOT NULL,
       visibility INTEGER DEFAULT 2,
       download_count INTEGER DEFAULT 0,
       view_count INTEGER DEFAULT 0,
       status INTEGER DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (upload_user_id) REFERENCES users(id) ON DELETE CASCADE
+      FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
     )
   `,
     err => {
@@ -219,7 +219,7 @@ db.serialize(() => {
   // 创建索引以提高查询性能
   db.run('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)');
   db.run('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
-  db.run('CREATE INDEX IF NOT EXISTS idx_documents_upload_user ON documents(upload_user_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_documents_created_by ON documents(created_by)');
   db.run('CREATE INDEX IF NOT EXISTS idx_documents_title ON documents(title)');
   db.run('CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status)');
   db.run('CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(name)');

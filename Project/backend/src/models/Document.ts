@@ -264,7 +264,7 @@ export class DocumentModel {
 
       // 添加过滤条件
       if (filter.userId !== undefined) {
-        sql += ' AND (upload_user_id = ? OR is_public = 1)';
+        sql += ' AND (created_by = ? OR is_public = 1)';
         params.push(filter.userId);
       }
 
@@ -279,7 +279,7 @@ export class DocumentModel {
       }
 
       if (filter.createdBy !== undefined) {
-        sql += ' AND upload_user_id = ?';
+        sql += ' AND created_by = ?';
         params.push(filter.createdBy);
       }
 
@@ -406,7 +406,7 @@ export class DocumentModel {
 
       // 如果提供了用户ID，获取用户的文档数量
       if (userId !== undefined) {
-        const myDocsStmt = db.prepare('SELECT COUNT(*) as count FROM documents WHERE upload_user_id = ?');
+        const myDocsStmt = db.prepare('SELECT COUNT(*) as count FROM documents WHERE created_by = ?');
         stats.myDocuments = (myDocsStmt.get(userId) as { count: number }).count;
       }
 

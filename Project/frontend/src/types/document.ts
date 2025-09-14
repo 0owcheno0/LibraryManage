@@ -14,7 +14,7 @@ export interface Document {
   is_public: number;
   view_count: number;
   download_count: number;
-  upload_user_id: number;
+  created_by: number;
   created_at: string;
   updated_at: string;
   creator_name: string;
@@ -67,7 +67,7 @@ export interface DocumentUpdateRequest {
   title?: string;
   description?: string;
   tags?: number[]; // Changed from string[] to number[] for tag IDs
-  isPublic?: boolean;
+  is_public?: number; // 修复：使用后端期望的字段名和类型
 }
 
 export interface DocumentListParams {

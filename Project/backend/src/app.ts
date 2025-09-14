@@ -20,7 +20,15 @@ import permissionRoutes from './routes/permissions';
 import sharedRoutes from './routes/shared';
 
 // 加载环境变量
-dotenv.config();
+const envPath = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+dotenv.config({ path: path.resolve(__dirname, '..', envPath) });
+
+// 调试：显示环境变量加载情况
+console.log(`🔧 Environment path: ${path.resolve(__dirname, '..', envPath)}`);
+console.log(`🔑 JWT_SECRET loaded: ${process.env.JWT_SECRET ? 'YES' : 'NO'}`);
+if (process.env.JWT_SECRET) {
+  console.log(`🔑 JWT_SECRET length: ${process.env.JWT_SECRET.length}`);
+}
 
 const app = express();
 const PORT = process.env.PORT || 8000;

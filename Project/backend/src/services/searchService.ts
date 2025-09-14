@@ -136,7 +136,7 @@ export class SearchService {
         queryParams.push(isPublic ? 1 : 0);
       } else if (userId) {
         // 如果没有指定公开性，则显示公开文档或用户自己的文档
-        conditions.push(`(d.is_public = 1 OR d.upload_user_id = ?)`);
+        conditions.push(`(d.is_public = 1 OR d.created_by = ?)`);
         queryParams.push(userId);
       } else {
         // 游客只能看公开文档
@@ -222,7 +222,7 @@ export class SearchService {
             ELSE ROUND(d.file_size / 1073741824.0, 2) || ' GB'
           END as formatted_size
         FROM documents d
-        LEFT JOIN users u ON d.upload_user_id = u.id
+        LEFT JOIN users u ON d.created_by = u.id
         ${whereClause}
         ${orderClause}
         LIMIT ? OFFSET ?
@@ -285,7 +285,7 @@ export class SearchService {
         baseConditions.push(`d.is_public = ?`);
         baseParams.push(isPublic ? 1 : 0);
       } else if (userId) {
-        baseConditions.push(`(d.is_public = 1 OR d.upload_user_id = ?)`);
+        baseConditions.push(`(d.is_public = 1 OR d.created_by = ?)`);
         baseParams.push(userId);
       } else {
         baseConditions.push(`d.is_public = 1`);

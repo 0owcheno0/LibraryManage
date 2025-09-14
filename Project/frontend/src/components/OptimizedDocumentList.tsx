@@ -284,7 +284,7 @@ const DocumentListItem: React.FC<{ document: Document }> = ({ document }) => {
                   <CalendarOutlined /> {dayjs(document.created_at).format('YYYY-MM-DD')}
                 </span>
                 <span>
-                  <UserOutlined /> {document.upload_user_id}
+                  <UserOutlined /> {document.created_by}
                 </span>
                 <span>
                   <FileOutlined /> {formatFileSize(document.file_size)}

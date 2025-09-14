@@ -1,7 +1,4 @@
 import jwt from 'jsonwebtoken';
-import { config } from 'dotenv';
-
-config();
 
 export interface TokenPayload {
   userId: string | number;
@@ -29,6 +26,7 @@ class JWTUtils {
   }
 
   generateAccessToken(payload: Omit<TokenPayload, 'type'>): string {
+    console.log(`[DEBUG] JWT生成 - ACCESS_SECRET: ${this.accessTokenSecret}`);
     return jwt.sign({ ...payload, type: 'access' }, this.accessTokenSecret, {
       expiresIn: this.accessTokenExpiry,
     } as jwt.SignOptions);

@@ -33,8 +33,8 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import axios from 'axios';
-import { createAuthenticatedAxios } from '../../services/api/config';
+import { tagService, CreateTagData, UpdateTagData } from '../../services/tag';
+import { ErrorHandler } from '../../utils/errorHandler';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -45,8 +45,8 @@ interface TagData {
   color: string;
   description?: string;
   created_by?: number;
-  usage_count: number;
-  document_count: number;
+  usage_count?: number;
+  document_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -92,26 +92,14 @@ export default function TagManagementPage() {
   const loadTags = async () => {
     setLoading(true);
     try {
-      const params = {
-        page,
-        pageSize,
-        sortBy,
-        sortOrder,
-        search: searchKeyword || undefined
-      };
-      
-      const response = await axios.get('/api/v1/tags', { params });
-      
-      if (response.data.code === 200) {
-        const data: TagListResponse = response.data.data;
-        setTags(data.tags);
-        setTotal(data.total);
-      } else {
-        message.error(response.data.message || '加载标签列表失败');
-      }
-    } catch (error) {
+      const response = await tagService.getTags();
+      // 现在data是包含tags字段的对象
+      setTags(response.data?.tags || []);
+      setTotal(response.data?.tags?.length || 0);
+    } catch (error: any) {
+      const errorInfo = ErrorHandler.handleApiError(error);
+      message.error(errorInfo.message || '加载标签列表失败');
       console.error('Load tags error:', error);
-      message.error('加载标签列表失败');
     } finally {
       setLoading(false);
     }
@@ -120,11 +108,9 @@ export default function TagManagementPage() {
   // 加载热门标签
   const loadPopularTags = async () => {
     try {
-      const response = await axios.get('/api/v1/tags/popular', { params: { limit: 5 } });
-      
-      if (response.data.code === 200) {
-        setPopularTags(response.data.data.tags);
-      }
+      const response = await tagService.getPopularTags();
+      // 现在data是包含tags字段的对象
+      setPopularTags(response.data?.tags?.slice(0, 5) || []);
     } catch (error) {
       console.error('Load popular tags error:', error);
     }
@@ -133,54 +119,19 @@ export default function TagManagementPage() {
   // 创建标签
   const handleCreateTag = async (values: CreateTagForm) => {
     try {
-      // 使用统一配置的axios实例，避免全局拦截器干扰
-      const createTagAxios = createAuthenticatedAxios();
+      const response = await tagService.createTag(values);
       
-      const response = await createTagAxios.post('/tags', values);
-      
-      if (response.data.code === 201) {
-        message.success('标签创建成功');
-        setCreateModalVisible(false);
-        createForm.resetFields();
-        loadTags();
-        loadPopularTags();
-      } else {
-        message.error(response.data.message || '标签创建失败');
-      }
+      message.success('标签创建成功');
+      setCreateModalVisible(false);
+      createForm.resetFields();
+      loadTags();
+      loadPopularTags();
     } catch (error: any) {
-      console.error('Create tag error:', error);
+      // 使用统一的错误处理器
+      const errorInfo = ErrorHandler.handleApiError(error);
+      message.error(errorInfo.message);
       
-      // 处理不同类型的错误，防止页面跳转
-      const status = error.response?.status;
-      const errorData = error.response?.data;
-      
-      let errorMessage = '标签创建失败';
-      
-      if (status === 401) {
-        errorMessage = '登录状态已过期，请重新登录后再试';
-      } else if (status === 403) {
-        errorMessage = '您没有权限创建标签，请联系管理员';
-      } else if (status === 409) {
-        errorMessage = '标签名称已存在，请使用其他名称';
-      } else if (status === 400) {
-        errorMessage = errorData?.message || '请求参数错误，请检查标签信息';
-      } else if (status >= 500) {
-        errorMessage = '服务器暂时不可用，请稍后再试';
-      } else if (errorData?.message) {
-        errorMessage = errorData.message;
-      } else if (!error.response) {
-        errorMessage = '网络连接失败，请检查网络设置';
-      }
-      
-      // 只显示错误信息，不触发页面跳转
-      message.error(errorMessage);
-      
-      // 记录错误用于调试，但不重新抛出
-      console.error('Tag creation failed:', {
-        status,
-        message: errorMessage,
-        originalError: error
-      });
+      console.error('标签创建失败:', errorInfo);
     }
   };
 
@@ -189,72 +140,67 @@ export default function TagManagementPage() {
     if (!editingTag) return;
     
     try {
-      const response = await axios.put(`/api/v1/tags/${editingTag.id}`, values);
+      await tagService.updateTag(editingTag.id, values);
       
-      if (response.data.code === 200) {
-        message.success('标签更新成功');
-        setEditModalVisible(false);
-        setEditingTag(null);
-        editForm.resetFields();
-        loadTags();
-        loadPopularTags();
-      } else {
-        message.error(response.data.message || '标签更新失败');
-      }
+      message.success('标签更新成功');
+      setEditModalVisible(false);
+      setEditingTag(null);
+      editForm.resetFields();
+      loadTags();
+      loadPopularTags();
     } catch (error: any) {
-      console.error('Update tag error:', error);
-      const errorMessage = error.response?.data?.message || '标签更新失败';
-      message.error(errorMessage);
+      // 使用统一的错误处理器
+      const errorInfo = ErrorHandler.handleApiError(error);
+      message.error(errorInfo.message);
+      
+      console.error('标签更新失败:', errorInfo);
     }
   };
 
   // 删除标签
   const handleDeleteTag = async (tagId: number, force = false) => {
     try {
-      const params = force ? { force: 'true' } : {};
-      const response = await axios.delete(`/api/v1/tags/${tagId}`, { params });
+      await tagService.deleteTag(tagId);
       
-      if (response.data.code === 200) {
-        message.success('标签删除成功');
-        loadTags();
-        loadPopularTags();
-      } else {
-        if (response.data.code === 409 && response.data.data?.documentCount > 0) {
-          Modal.confirm({
-            title: '标签正在使用中',
-            content: `该标签被 ${response.data.data.documentCount} 个文档使用，强制删除将会移除所有关联关系。确定要删除吗？`,
-            okText: '强制删除',
-            okType: 'danger',
-            cancelText: '取消',
-            onOk: () => handleDeleteTag(tagId, true)
-          });
-        } else {
-          message.error(response.data.message || '标签删除失败');
-        }
-      }
+      message.success('标签删除成功');
+      loadTags();
+      loadPopularTags();
     } catch (error: any) {
-      console.error('Delete tag error:', error);
-      const errorMessage = error.response?.data?.message || '标签删除失败';
-      message.error(errorMessage);
+      // 使用统一的错误处理器
+      const errorInfo = ErrorHandler.handleApiError(error);
+      
+      // 处理特殊的409冲突错误（标签正在使用中）
+      if (error.response?.status === 409 && !force) {
+        const documentCount = error.response?.data?.data?.documentCount || 0;
+        Modal.confirm({
+          title: '标签正在使用中',
+          content: `该标签被 ${documentCount} 个文档使用，强制删除将会移除所有关联关系。确定要删除吗？`,
+          okText: '强制删除',
+          okType: 'danger',
+          cancelText: '取消',
+          onOk: () => handleDeleteTag(tagId, true)
+        });
+      } else {
+        message.error(errorInfo.message);
+        console.error('标签删除失败:', errorInfo);
+      }
     }
   };
 
   // 同步使用次数统计
   const handleSyncUsageCounts = async () => {
     try {
-      const response = await axios.post('/api/v1/tags/sync-usage-counts');
+      await tagService.syncUsageCounts();
       
-      if (response.data.code === 200) {
-        message.success('统计数据同步成功');
-        loadTags();
-        loadPopularTags();
-      } else {
-        message.error(response.data.message || '统计数据同步失败');
-      }
+      message.success('统计数据同步成功');
+      loadTags();
+      loadPopularTags();
     } catch (error: any) {
-      console.error('Sync usage counts error:', error);
-      const errorMessage = error.response?.data?.message || '统计数据同步失败';
-      message.error(errorMessage);
+      // 使用统一的错误处理器
+      const errorInfo = ErrorHandler.handleApiError(error);
+      message.error(errorInfo.message);
+      
+      console.error('统计数据同步失败:', errorInfo);
     }
   };
 
@@ -305,7 +251,7 @@ export default function TagManagementPage() {
         <Badge 
           count={count} 
           style={{ 
-            backgroundColor: count > 0 ? '#52c41a' : '#d9d9d9'
+            backgroundColor: (count || 0) > 0 ? '#52c41a' : '#d9d9d9'
           }} 
         />
       ),
@@ -385,9 +331,9 @@ export default function TagManagementPage() {
                         <div>
                           <Text strong>使用次数：</Text>
                           <Badge 
-                            count={record.document_count} 
+                            count={record.document_count || 0} 
                             style={{ 
-                              backgroundColor: record.document_count > 0 ? '#52c41a' : '#d9d9d9',
+                              backgroundColor: (record.document_count || 0) > 0 ? '#52c41a' : '#d9d9d9',
                               marginLeft: 8
                             }} 
                           />
@@ -426,8 +372,8 @@ export default function TagManagementPage() {
               <Popconfirm
                 title="确定要删除这个标签吗？"
                 description={
-                  record.document_count > 0 
-                    ? `该标签被 ${record.document_count} 个文档使用，删除后需要处理关联关系。`
+                  (record.document_count || 0) > 0 
+                    ? `该标签被 ${record.document_count || 0} 个文档使用，删除后需要处理关联关系。`
                     : '删除后无法恢复。'
                 }
                 onConfirm={() => handleDeleteTag(record.id)}

@@ -14,6 +14,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import DocumentListPage from './pages/documents/DocumentListPage';
 import DocumentDetailPage from './pages/documents/DocumentDetailPage';
+import DocumentEditPage from './pages/documents/DocumentEditPage';
 import TeamDocumentsPage from './pages/documents/TeamDocumentsPage';
 import TagManagementPage from './pages/tags/TagManagementPage';
 import SearchPage from './pages/search/SearchPage';
@@ -51,6 +52,7 @@ function App() {
               <Route path="documents" element={<DocumentListPage />} />
               <Route path="documents/team" element={<TeamDocumentsPage />} />
               <Route path="documents/:id" element={<DocumentDetailPage />} />
+              <Route path="documents/:id/edit" element={<DocumentEditPage />} />
               <Route path="tags" element={<TagManagementPage />} />
               <Route path="search" element={<SearchPage />} />
               <Route path="profile" element={<ProfilePage />} />

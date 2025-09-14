@@ -147,7 +147,7 @@ router.post('/', authenticate, uploadSingleDocument, async (req: AuthenticatedRe
     const documentData: CreateDocumentData = {
       title,
       description: description || null,
-      file_name: uploadedFile.filename,
+      file_name: `${title}${getFileExtension(fileInfo.metadata.mimetype)}`, // 使用文档标题作为文件名
       file_path: uploadedFile.path,
       file_size: fileInfo.metadata.size,
       mime_type: fileInfo.metadata.mimetype,

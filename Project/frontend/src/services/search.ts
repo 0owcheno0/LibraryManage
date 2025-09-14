@@ -286,10 +286,20 @@ export class HighlightHelper {
    * 移除HTML标签
    */
   static stripHtml(html: string): string {
-    if (typeof window !== 'undefined' && window.DOMParser) {
+    if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
       try {
         const doc = new DOMParser().parseFromString(html, 'text/html');
-        return doc.body.textContent || '';
+        // 确保textContent存在且是字符串
+        if (doc.body && typeof doc.body.textContent === 'string') {
+          return doc.body.textContent || '';
+        }
+        // 回退到textContent
+        const textContent = doc.textContent;
+        if (typeof textContent === 'string') {
+          return textContent || '';
+        }
+        // 最后的回退方案
+        return html.replace(/<[^>]*>/g, '');
       } catch (error) {
         // 如果DOMParser失败，使用正则表达式作为后备方案
         return html.replace(/<[^>]*>/g, '');

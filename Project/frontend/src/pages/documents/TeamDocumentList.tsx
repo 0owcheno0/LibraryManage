@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Tag, Avatar, message } from 'antd';
+import { Table, Button, Space, Tag, Avatar, message, Typography } from 'antd';
+
+const { Text } = Typography;
 import { 
   UserOutlined, 
   EyeOutlined, 
@@ -120,9 +122,31 @@ const TeamDocumentList: React.FC<TeamDocumentListProps> = ({
               </Button>
             </div>
             <Text type="secondary" style={{ fontSize: '12px' }}>
-              {record.file_name}
+              {decodeURIComponent(record.file_name)}
             </Text>
           </div>
+        </Space>
+      ),
+    },
+    {
+      title: '标签',
+      dataIndex: 'tags',
+      key: 'tags',
+      render: (_: any, record: Document) => (
+        <Space size={[4, 4]} wrap>
+          {record.tags && record.tags.length > 0 ? (
+            record.tags.map(tag => (
+              <Tag 
+                key={tag.id} 
+                color={tag.color || 'default'}
+                style={{ margin: 0 }}
+              >
+                {tag.name}
+              </Tag>
+            ))
+          ) : (
+            <Text type="secondary">-</Text>
+          )}
         </Space>
       ),
     },

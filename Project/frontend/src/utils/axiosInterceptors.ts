@@ -189,19 +189,13 @@ window.addEventListener('unhandledrejection', (event) => {
     url: window.location.href
   };
 
-  fetch('/api/v1/logs/error', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(errorLog)
-  }).catch(() => {
-    // 存储到本地
-    const localErrors = JSON.parse(localStorage.getItem('unhandledErrors') || '[]');
-    localErrors.push(errorLog);
-    if (localErrors.length > 50) {
-      localErrors.splice(0, localErrors.length - 50);
-    }
-    localStorage.setItem('unhandledErrors', JSON.stringify(localErrors));
-  });
+  // 存储到本地
+  const localErrors = JSON.parse(localStorage.getItem('unhandledErrors') || '[]');
+  localErrors.push(errorLog);
+  if (localErrors.length > 50) {
+    localErrors.splice(0, localErrors.length - 50);
+  }
+  localStorage.setItem('unhandledErrors', JSON.stringify(localErrors));
 
   // 防止在控制台显示错误（可选）
   // event.preventDefault();
@@ -224,19 +218,13 @@ window.addEventListener('error', (event) => {
     url: window.location.href
   };
 
-  fetch('/api/v1/logs/error', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(errorLog)
-  }).catch(() => {
-    // 存储到本地
-    const localErrors = JSON.parse(localStorage.getItem('jsErrors') || '[]');
-    localErrors.push(errorLog);
-    if (localErrors.length > 50) {
-      localErrors.splice(0, localErrors.length - 50);
-    }
-    localStorage.setItem('jsErrors', JSON.stringify(localErrors));
-  });
+  // 存储到本地
+  const localErrors = JSON.parse(localStorage.getItem('jsErrors') || '[]');
+  localErrors.push(errorLog);
+  if (localErrors.length > 50) {
+    localErrors.splice(0, localErrors.length - 50);
+  }
+  localStorage.setItem('jsErrors', JSON.stringify(localErrors));
 });
 
 // 导出带认证的axios实例

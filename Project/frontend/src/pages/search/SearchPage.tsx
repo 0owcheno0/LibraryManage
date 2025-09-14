@@ -19,6 +19,10 @@ import {
   Spin,
   Pagination,
   message,
+  AutoComplete,
+  Tooltip,
+  theme,
+  InputRef,
 } from 'antd';
 import {
   SearchOutlined,
@@ -28,17 +32,25 @@ import {
   EyeOutlined,
   DownloadOutlined,
   ClockCircleOutlined,
+  HistoryOutlined,
+  ClearOutlined,
+  UserOutlined,
+  FileOutlined,
 } from '@ant-design/icons';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import DownloadButton from '../../components/DownloadButton';
 import dayjs from 'dayjs';
-import { searchService } from '../../services/search';
+import { searchService, searchHistoryManager, HighlightHelper } from '../../services/search';
 import { documentService } from '../../services/document';
 import SearchInput from '../../components/SearchInput';
 import QuickTagFilter from '../../components/QuickTagFilter';
+import TagSelector from '../../components/TagSelector';
 import { ErrorHandler } from '../../utils/errorHandler';
 import type { Document, DocumentListResponse } from '../../types';
+import type { SearchResult } from '../../services/search';
 
 const { Title, Text, Paragraph } = Typography;
-const { Panel } = Collapse;
+const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 interface SearchParams {
@@ -47,24 +59,31 @@ interface SearchParams {
   pageSize?: number;
   startDate?: string;
   endDate?: string;
-  tags?: string;
+  tags?: number[];
   mimeType?: string;
   isPublic?: boolean;
+  fileType?: string;
+  sortBy?: 'relevance' | 'created_at' | 'file_size' | 'view_count' | 'download_count';
+  sortOrder?: 'ASC' | 'DESC';
 }
 
 export default function SearchPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(20);
-  const [keyword, setKeyword] = useState<string>('');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [autoCompleteOptions, setAutoCompleteOptions] = useState<any[]>([]);
   const [filters, setFilters] = useState<any>({});
   const [quickFilters, setQuickFilters] = useState<any>({});
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [searchResult, setSearchResult] = useState<DocumentListResponse | null>(null);
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [advancedVisible, setAdvancedVisible] = useState<boolean>(false);
+  const { token } = theme.useToken();
+  const { colorTextSecondary: textSecondary, colorPrimary: primary } = token;
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -82,8 +101,8 @@ export default function SearchPage() {
       endDate: endDate || undefined,
       page: page ? parseInt(page) : 1,
       pageSize: 10,
-      sortBy: 'relevance',
-      sortOrder: 'DESC',
+      sortBy: 'relevance' as const,
+      sortOrder: 'DESC' as const,
     };
 
     setFilters(initialFilters);
@@ -93,7 +112,15 @@ export default function SearchPage() {
       performSearch(initialFilters);
     }
 
-    setSearchHistory(searchHistoryManager.getHistory());
+    // 初始化搜索历史
+    const history = localStorage.getItem('searchHistory');
+    if (history) {
+      try {
+        setSearchHistory(JSON.parse(history));
+      } catch (e) {
+        setSearchHistory([]);
+      }
+    }
   }, []);
 
   const performSearch = async (params: SearchParams) => {
@@ -203,7 +230,7 @@ export default function SearchPage() {
   const handleTagQuickSearch = (tagId: number) => {
     const currentTags = filters.tags || [];
     const newTags = currentTags.includes(tagId)
-      ? currentTags.filter(id => id !== tagId)
+      ? currentTags.filter((id: number) => id !== tagId)
       : [...currentTags, tagId];
 
     const newFilters = {
@@ -337,16 +364,16 @@ export default function SearchPage() {
             }}
             style={{ width: '100%' }}
           >
-            <Search
+            <Input
               placeholder="输入关键词搜索文档..."
               size="large"
               allowClear
-              enterButton={
-                <Button type="primary" icon={<SearchOutlined />} loading={loading}>
+              onPressEnter={(e) => handleSearch(e.currentTarget.value)}
+              suffix={
+                <Button type="primary" icon={<SearchOutlined />} loading={loading} onClick={() => handleSearch(searchKeyword)}>
                   搜索
                 </Button>
               }
-              onSearch={handleSearch}
             />
           </AutoComplete>
         </div>
@@ -577,8 +604,8 @@ export default function SearchPage() {
                   />
                 )
               ) : (
-                <div style={{ textAlign: 'center', padding: '60px 0', color: colors.textSecondary }}>
-                  <SearchOutlined style={{ fontSize: 48, marginBottom: 16, color: colors.primary }} />
+                <div style={{ textAlign: 'center', padding: '60px 0', color: textSecondary }}>
+                  <SearchOutlined style={{ fontSize: 48, marginBottom: 16, color: primary }} />
                   <div style={{ fontSize: 16 }}>请输入关键词开始搜索</div>
                   <Paragraph type="secondary">
                     支持按文档标题、内容、标签和文件类型搜索

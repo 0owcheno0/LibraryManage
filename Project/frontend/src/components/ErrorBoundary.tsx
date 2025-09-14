@@ -57,36 +57,35 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.logErrorToService(error, errorInfo);
   }
 
-  // 发送错误日志到后端
-  private logErrorToService = async (error: Error, errorInfo: ErrorInfo) => {
+  // 记录错误到后端服务
+  logErrorToService = async (error: Error, errorInfo: React.ErrorInfo) => {
     try {
+      // 生成唯一错误ID
+      const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       const errorLog = {
+        errorId,
         message: error.message,
         stack: error.stack,
         componentStack: errorInfo.componentStack,
         url: window.location.href,
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString(),
-        errorId: this.state.errorId
+        environment: process.env.NODE_ENV || 'development'
       };
 
-      // 发送到后端日志服务
-      await fetch('/api/v1/logs/error', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(errorLog)
-      }).catch(() => {
-        // 如果后端不可用，记录到本地存储
-        const localErrors = JSON.parse(localStorage.getItem('clientErrors') || '[]');
-        localErrors.push(errorLog);
-        // 只保留最近50个错误
-        if (localErrors.length > 50) {
-          localErrors.splice(0, localErrors.length - 50);
-        }
-        localStorage.setItem('clientErrors', JSON.stringify(localErrors));
-      });
+      // 只使用本地存储，移除向不存在的API端点发送请求的代码
+      // 存储到本地存储
+      const localErrors = JSON.parse(localStorage.getItem('clientErrors') || '[]');
+      localErrors.push(errorLog);
+      // 只保留最近50个错误
+      if (localErrors.length > 50) {
+        localErrors.splice(0, localErrors.length - 50);
+      }
+      localStorage.setItem('clientErrors', JSON.stringify(localErrors));
+
+      // 更新组件状态
+      this.setState({ errorId });
     } catch (logError) {
       console.error('无法记录错误日志:', logError);
     }
@@ -154,44 +153,53 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           {/* 开发环境显示详细错误信息 */}
           {process.env.NODE_ENV === 'development' && this.state.error && (
             <Card title="错误详情 (仅开发环境显示)" style={{ marginTop: '24px' }}>
-              <Collapse>
-                <Panel header="错误信息" key="1">
-                  <Paragraph>
-                    <Text strong>错误消息:</Text>
-                    <br />
-                    <Text code>{this.state.error.message}</Text>
-                  </Paragraph>
-                  
-                  <Paragraph>
-                    <Text strong>错误堆栈:</Text>
-                    <pre style={{ 
-                      background: '#f5f5f5', 
-                      padding: '12px', 
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      overflow: 'auto',
-                      maxHeight: '200px'
-                    }}>
-                      {this.state.error.stack}
-                    </pre>
-                  </Paragraph>
-                </Panel>
-
-                {this.state.errorInfo && (
-                  <Panel header="组件堆栈" key="2">
-                    <pre style={{ 
-                      background: '#f5f5f5', 
-                      padding: '12px', 
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      overflow: 'auto',
-                      maxHeight: '200px'
-                    }}>
-                      {this.state.errorInfo.componentStack}
-                    </pre>
-                  </Panel>
-                )}
-              </Collapse>
+              <Collapse
+                items={[
+                  {
+                    key: '1',
+                    label: '错误信息',
+                    children: (
+                      <Paragraph>
+                        <Text strong>错误消息:</Text>
+                        <br />
+                        <Text code>{this.state.error.message}</Text>
+                      </Paragraph>
+                    ),
+                  },
+                  {
+                    key: '2',
+                    label: '错误堆栈',
+                    children: (
+                      <pre style={{ 
+                        background: '#f5f5f5', 
+                        padding: '12px', 
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        overflow: 'auto',
+                        maxHeight: '200px'
+                      }}>
+                        {this.state.error.stack}
+                      </pre>
+                    ),
+                  },
+                  ...(this.state.errorInfo ? [{
+                    key: '3',
+                    label: '组件堆栈',
+                    children: (
+                      <pre style={{ 
+                        background: '#f5f5f5', 
+                        padding: '12px', 
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        overflow: 'auto',
+                        maxHeight: '200px'
+                      }}>
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    ),
+                  }] : []),
+                ]}
+              />
             </Card>
           )}
         </div>

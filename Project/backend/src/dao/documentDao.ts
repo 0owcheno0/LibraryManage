@@ -186,8 +186,23 @@ export class DocumentDao {
       params.push(pageSize, offset);
       const documents = db.prepare(dataQuery).all(...params) as DocumentListItem[];
 
+      // 对文件名进行解码处理
+      const decodedDocuments = documents.map(doc => {
+        try {
+          // 尝试解码文件名
+          const decodedFileName = decodeURIComponent(doc.file_name);
+          return {
+            ...doc,
+            file_name: decodedFileName
+          };
+        } catch (e) {
+          // 如果解码失败，返回原始文件名
+          return doc;
+        }
+      });
+
       return {
-        documents,
+        documents: decodedDocuments,
         total,
         page,
         pageSize
@@ -222,6 +237,20 @@ export class DocumentDao {
         return null;
       }
 
+      // 对文件名进行解码处理
+      let decodedDocument = document;
+      try {
+        // 尝试解码文件名
+        const decodedFileName = decodeURIComponent(document.file_name);
+        decodedDocument = {
+          ...document,
+          file_name: decodedFileName
+        };
+      } catch (e) {
+        // 如果解码失败，使用原始文件名
+        decodedDocument = document;
+      }
+
       // 获取文档标签
       const tagsQuery = `
         SELECT t.id, t.name, t.color
@@ -234,7 +263,7 @@ export class DocumentDao {
       const tags = db.prepare(tagsQuery).all(id) as Array<{ id: number; name: string; color: string }>;
 
       return {
-        ...document,
+        ...decodedDocument,
         tags
       };
     } catch (error) {

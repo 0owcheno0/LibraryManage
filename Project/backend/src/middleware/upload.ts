@@ -46,13 +46,12 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req: Request, file: Express.Multer.File, cb) => {
-    // 生成唯一文件名: 时间戳 + 随机数 + 原文件名
-    const timestamp = Date.now();
-    const randomString = crypto.randomBytes(8).toString('hex');
-    const sanitizedOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-_]/g, '_');
-    const uniqueFilename = `${timestamp}-${randomString}-${sanitizedOriginalName}`;
+    // 直接使用原始文件名，只替换特殊字符以确保文件系统兼容性
+    const sanitizedOriginalName = file.originalname.replace(/[<>:"|?*\\\/]/g, '_');
+    // 使用Buffer确保中文字符正确处理
+    const buffer = Buffer.from(sanitizedOriginalName, 'utf8');
     
-    cb(null, uniqueFilename);
+    cb(null, buffer.toString('utf8'));
   }
 });
 
@@ -70,6 +69,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
 export const uploadMiddleware = multer({
   storage: storage,
   fileFilter: fileFilter,
+  preservePath: true, // 保持文件路径编码
   limits: {
     fileSize: MAX_FILE_SIZE, // 100MB
     files: 1, // 一次只能上传一个文件
